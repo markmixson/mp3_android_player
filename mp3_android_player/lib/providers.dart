@@ -15,5 +15,9 @@ final audioFilePickerServiceProvider = Provider<AudioFilePickerService>((ref) {
 
 /// Provider for the [AudioPlayerService].
 final audioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
-  return DefaultAudioPlayerService(player: AudioPlayer());
+  final player = DefaultAudioPlayerService(player: AudioPlayer());
+  ref.onDispose(() {
+    player.dispose();
+  });
+  return player;
 });
