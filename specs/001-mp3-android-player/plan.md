@@ -11,9 +11,9 @@
 - **Language**: Dart
 
 ### Implementation Details
-- **NEEDS CLARIFICATION**: Specific Android SDK minimum version required.
-- **NEEDS CLARIFICATION**: Handling of audio focus (e.g., when receiving a phone call).
-- **NEEDS CLARIFICATION**: Persistence of playback position if the app is backgrounded/killed.
+- Android sdk 36.1.0 supported.
+- Application does not need to handle audio focus (e.g., when receiving a phone call).
+- Persistence of playback position if the app is backgrounded/killed is not important.
 - **DI Strategy**: Use `Riverpod` providers to inject `AudioPlayerService` and `AudioFilePickerService` into the UI and other parts of the application.
 - **State Management Strategy**: Use `StateNotifier` or `AsyncNotifier` (via Riverpod) to manage `PlaybackState` and current `AudioFile`.
 
