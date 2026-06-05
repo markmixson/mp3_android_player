@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:mp3_android_player/providers.dart';
 import 'package:mp3_android_player/providers/player_notifier.dart';
 
@@ -16,7 +17,11 @@ class PlayerScreen extends ConsumerWidget {
   Widget build(final BuildContext context, final WidgetRef ref) {
     final state = ref.watch(playerNotifierProvider);
     final notifier = ref.read(playerNotifierProvider.notifier);
-    final audioPlayerService = ref.read(audioPlayerServiceProvider);
+    final defaultAudioPlayerService = ref.read(defaultAudioPlayerServiceProvider);
+    final hapticAudioPlayerService = ref.read(hapticAudioPlayerServiceProvider);
+    final currentAudioPlayerService = state.hapticMode == HapticMode.enabled
+        ? hapticAudioPlayerService
+        : defaultAudioPlayerService;
     return Scaffold(
       appBar: AppBar(title: const Text('MP3 Player')),
       body: Center(
@@ -30,13 +35,13 @@ class PlayerScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 20),
               StreamBuilder<Duration>(
-                stream: audioPlayerService.positionStream,
+                stream: currentAudioPlayerService.positionStream,
                 builder: (context, snapshot) {
                   final position = snapshot.data ?? Duration.zero;
                   return Column(
                     children: [
                       StreamBuilder<Duration>(
-                        stream: audioPlayerService.durationStream,
+                        stream: currentAudioPlayerService.durationStream,
                         builder: (context, snapshot) {
                           final duration = snapshot.data ?? Duration.zero;
                           final double current = position.inSeconds.toDouble();
@@ -45,7 +50,7 @@ class PlayerScreen extends ConsumerWidget {
                           return Slider(
                             value: current.clamp(0.0, total),
                             onChanged: (val) {
-                              audioPlayerService.seek(
+                              currentAudioPlayerService.seek(
                                 Duration(seconds: val.toInt()),
                               );
                             },
@@ -65,6 +70,16 @@ class PlayerScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Switch(
+                  value: state.hapticMode == HapticMode.enabled,
+                  onChanged: (bool value) {
+                    notifier.toggleHapticMode(
+                      value ? HapticMode.enabled : HapticMode.disabled,
+                    );
+                  },
+                ),
+                const Text('Haptic Mode'),
+                const SizedBox(width: 20),
                 IconButton(
                   icon: const Icon(Icons.file_present),
                   onPressed: () async => notifier.pickAndPlayFile(),

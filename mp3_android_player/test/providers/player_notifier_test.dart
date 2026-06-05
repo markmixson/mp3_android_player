@@ -37,7 +37,7 @@ void main() {
 
     container = ProviderContainer(
       overrides: [
-        audioPlayerServiceProvider.overrideWithValue(mockAudioPlayerService),
+        defaultAudioPlayerServiceProvider.overrideWithValue(mockAudioPlayerService),
         audioFilePickerServiceProvider.overrideWithValue(
           mockAudioFilePickerService,
         ),

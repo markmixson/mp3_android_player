@@ -17,8 +17,8 @@ Goal: Enable toggling a low-pass filter via UI.
 ### User Story 2 - Persistence of Haptic Setting [US2]
 Goal: Remember haptic mode preference.
 
-- [ ] T006 [P] Update `PlayerNotifier` to manage and persist `HapticMode` state
-- [ ] T007 [P] Implement preference persistence (e.g., using `shared_preferences`)
+- [X] T006 [P] Update `PlayerNotifier` to manage and persist `HapticMode` state
+- [X] T007 [P] Implement preference persistence (e.g., using `shared_preferences`)
 
 ### Phase: UI Implementation
 Goal: Add the toggle to the player interface.

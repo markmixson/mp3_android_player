@@ -47,6 +47,9 @@ class DefaultAudioPlayerService implements AudioPlayerService {
     _player.stop();
   }
 
+  @override
+  bool get hasAudioSource => _player.audioSource != null;
+
   void dispose() {
     _player.dispose();
   }

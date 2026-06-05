@@ -9,4 +9,5 @@ abstract class AudioPlayerService {
   Stream<Duration> get positionStream;
   Stream<Duration> get durationStream;
   void stop() => throw UnimplementedError();
+  bool get hasAudioSource => throw UnimplementedError();
 }

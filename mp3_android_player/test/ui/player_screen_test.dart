@@ -13,12 +13,15 @@ import 'package:mp3_android_player/ui/player_screen.dart';
 
 class MockAudioService extends Mock implements AudioPlayerService {}
 
+class MockHapticAudioPlayerService extends Mock implements AudioPlayerService {}
+
 class MockFilePickerService extends Mock implements AudioFilePickerService {}
 
 late ProviderContainer container;
 
 void main() {
   late MockAudioService audioService;
+  late MockHapticAudioPlayerService hapticAudioService;
   late MockFilePickerService filePickerService;
   late StreamController<Duration> positionController;
   late StreamController<Duration> durationController;
@@ -41,6 +44,7 @@ void main() {
 
   setUp(() {
     audioService = MockAudioService();
+    hapticAudioService = MockHapticAudioPlayerService();
     filePickerService = MockFilePickerService();
     positionController = StreamController<Duration>.broadcast();
     durationController = StreamController<Duration>.broadcast();
@@ -54,10 +58,12 @@ void main() {
     when(() => audioService.pause()).thenReturn(null);
     when(() => audioService.resume()).thenReturn(null);
     when(() => audioService.seek(any())).thenAnswer((_) async {});
+    when(() => hapticAudioService.seek(any())).thenAnswer((_) async {});
 
     container = ProviderContainer(
       overrides: [
-        audioPlayerServiceProvider.overrideWithValue(audioService),
+        defaultAudioPlayerServiceProvider.overrideWithValue(audioService),
+        hapticAudioPlayerServiceProvider.overrideWithValue(hapticAudioService),
         audioFilePickerServiceProvider.overrideWithValue(filePickerService),
       ],
     );
@@ -143,6 +149,41 @@ void main() {
         expect(find.byIcon(Icons.pause), findsOneWidget);
       },
     );
+
+    testWidgets('haptic mode toggle switches between services', (
+      tester,
+    ) async {
+      when(
+        () => filePickerService.pickFile(),
+      ).thenAnswer((_) async => audioFile);
+      when(() => audioService.play(any())).thenAnswer((_) async {});
+      when(() => hapticAudioService.play(any())).thenAnswer((_) async {});
+      when(() => audioService.pause()).thenReturn(null);
+      when(() => hapticAudioService.pause()).thenReturn(null);
+      when(() => audioService.seek(any())).thenAnswer((_) async {});
+      when(() => hapticAudioService.seek(any())).thenAnswer((_) async {});
+
+      await tester.pumpWidget(buildPlayerScreen());
+      await tester.tap(find.byIcon(Icons.file_present));
+      await tester.pumpAndSettle();
+
+      // Start with default (non-haptic)
+      expect(find.text('Now Playing: ${audioFile.name}'), findsOneWidget);
+
+      // Toggle Haptic Mode ON
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      verify(() => audioService.pause()).called(1);
+      verify(() => audioService.seek(any())).called(1);
+
+      // Toggle Haptic Mode OFF
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      verify(() => hapticAudioService.pause()).called(1);
+      verify(() => hapticAudioService.seek(any())).called(1);
+    });
 
     testWidgets('slider seek updates position stream and calls seek', (
       tester,

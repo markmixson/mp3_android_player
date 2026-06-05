@@ -25,6 +25,8 @@ class DefaultHapticFilterService implements HapticFilterService {
     final ext = p.extension(audioFile.path);
     final outputPath = p.join(tempDir.path, 'haptic_$time.$ext');
 
+    _tempFiles.add(outputPath);
+
     // Apply a low-pass filter at 500Hz
     return _helper
         .executeAsync(_tempFiles, outputPath, '''

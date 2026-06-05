@@ -33,7 +33,7 @@ final hapticFilterServiceProvider = Provider<HapticFilterService>((ref) {
 });
 
 /// Default Provider for the [AudioPlayerService].
-final audioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
+final defaultAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
   final player = DefaultAudioPlayerService(player: AudioPlayer());
   ref.onDispose(() {
     player.dispose();

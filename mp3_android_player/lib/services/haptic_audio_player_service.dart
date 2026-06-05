@@ -30,7 +30,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
       await _setupPlayer(audioFile);
       _player.play();
     } catch (e) {
-      debugPrint('Error playing audio: ');
+      debugPrint('Error playing audio: $e');
       rethrow;
     }
   }
