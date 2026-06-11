@@ -1,26 +1,33 @@
-import 'dart:io';
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_helper.dart';
+import 'package:mp3_android_player/helpers/file_helper.dart';
+import 'package:mp3_android_player/helpers/temporary_directory_helper.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
 import 'package:mp3_android_player/services/haptic_filter_service_interface.dart';
-import 'package:path_provider/path_provider.dart';
+
 import 'package:path/path.dart' as p;
 
 class DefaultHapticFilterService implements HapticFilterService {
   final Clock _clock;
   final List<String> _tempFiles = [];
-  final FFmpegHelper _helper;
+  final FFmpegHelper _ffmpegHelper;
+  final TemporaryDirectoryHelper _temporaryDirectoryHelper;
+  final FileHelper _fileHelper;
 
   DefaultHapticFilterService({
     required Clock clock,
-    required FFmpegHelper helper,
-  }) : _helper = helper,
-       _clock = clock;
+    required FFmpegHelper ffmpegHelper,
+    required TemporaryDirectoryHelper temporaryDirectoryHelper,
+    required FileHelper fileHelper 
+  }) : _ffmpegHelper = ffmpegHelper,
+       _temporaryDirectoryHelper = temporaryDirectoryHelper,
+       _clock = clock,
+       _fileHelper = fileHelper;
 
   @override
   Future<String> applyHapticFilter(final AudioFile audioFile) async {
-    final tempDir = await getTemporaryDirectory();
+    final tempDir = await _temporaryDirectoryHelper.getTemporaryDirectory();
     final time = _clock.now().millisecondsSinceEpoch;
     final ext = p.extension(audioFile.path);
     final outputPath = p.join(tempDir.path, 'haptic_$time.$ext');
@@ -28,7 +35,7 @@ class DefaultHapticFilterService implements HapticFilterService {
     _tempFiles.add(outputPath);
 
     // Apply a low-pass filter at 500Hz
-    return _helper
+    return _ffmpegHelper
         .executeAsync(_tempFiles, outputPath, '''
         -i "${audioFile.path}"
         -af lowpass=f=500 
@@ -41,7 +48,7 @@ class DefaultHapticFilterService implements HapticFilterService {
   Future<void> clearTemporaryFiles() async {
     for (final path in _tempFiles) {
       try {
-        final file = File(path);
+        final file = _fileHelper.getFile(path);
         if (await file.exists()) {
           await file.delete();
         }

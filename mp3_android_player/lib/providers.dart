@@ -2,8 +2,10 @@ import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_helper.dart';
+import 'package:mp3_android_player/helpers/ffmpeg_wrapper.dart';
 import 'package:mp3_android_player/helpers/file_helper.dart';
 import 'package:mp3_android_player/helpers/mime_helper.dart';
+import 'package:mp3_android_player/helpers/temporary_directory_helper.dart';
 import 'package:mp3_android_player/services/audio_file_picker_service_interface.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
 // ignore: implementation_imports
@@ -22,9 +24,12 @@ final audioFilePickerServiceProvider = Provider<AudioFilePickerService>((ref) {
 
 /// Provider for the [HapticFilterService]
 final hapticFilterServiceProvider = Provider<HapticFilterService>((ref) {
+  final ffmpegWrapper = FFmpegWrapper();
   final hapticFilterService = DefaultHapticFilterService(
     clock: Clock(),
-    helper: FFmpegHelper(),
+    ffmpegHelper: FFmpegHelper(wrapper: ffmpegWrapper),
+    temporaryDirectoryHelper: TemporaryDirectoryHelper(),
+    fileHelper: FileHelper(),
   );
   ref.onDispose(() {
     hapticFilterService.clearTemporaryFiles();

@@ -1,0 +1,12 @@
+import 'package:ffmpeg_kit_audio_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
+
+// coverage:ignore-file
+class FFmpegWrapper {
+  Future<FFmpegSession> executeAsync(
+    final String command,
+    final Function(FFmpegSession)? callback
+  ) async {
+    return FFmpegKit.executeAsync(command, callback);
+  }
+}

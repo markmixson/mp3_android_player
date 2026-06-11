@@ -6,9 +6,12 @@ import 'package:mp3_android_player/services/default_audio_player_service.dart';
 
 class MockAudioPlayer extends Mock implements AudioPlayer {}
 
+class MockAudioSource extends Mock implements AudioSource {}
+
 void main() {
   late DefaultAudioPlayerService audioPlayerService;
   late MockAudioPlayer mockAudioPlayer;
+  late MockAudioSource mockAudioSource;
   final audioFile = AudioFile(
     path: 'test/path/to/audio.mp3',
     name: 'test.mp3',
@@ -18,6 +21,7 @@ void main() {
   setUp(() {
     mockAudioPlayer = MockAudioPlayer();
     audioPlayerService = DefaultAudioPlayerService(player: mockAudioPlayer);
+    mockAudioSource = MockAudioSource();
 
     registerFallbackValue(audioFile);
     registerFallbackValue(Duration.zero);
@@ -113,5 +117,39 @@ void main() {
 
       verify(() => mockAudioPlayer.dispose()).called(1);
     });
+
+    // Parameterized test cases to cover both branches of the boolean expression
+    final testCases = [
+      {
+        'hasSource': true,
+        'expected': true,
+        'description': 'returns true when audioSource is not null',
+      },
+      {
+        'hasSource': false,
+        'expected': false,
+        'description': 'returns false when audioSource is null',
+      },
+    ];
+
+    for (var params in testCases) {
+      final bool hasSource = params['hasSource'] as bool;
+      final bool expectedResult = params['expected'] as bool;
+      final String description = params['description'] as String;
+
+      test(description, () {
+        if (hasSource) {
+          when(() => mockAudioPlayer.audioSource).thenReturn(mockAudioSource);
+        } else {
+          when(() => mockAudioPlayer.audioSource).thenReturn(null);
+        }
+
+        // Act
+        final result = audioPlayerService.hasAudioSource;
+
+        // Assert
+        expect(result, equals(expectedResult));
+      });
+    }
   });
 }
