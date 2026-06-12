@@ -13,8 +13,11 @@ import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
 import 'package:mp3_android_player/services/default_audio_file_picker_service.dart';
 import 'package:mp3_android_player/services/default_audio_player_service.dart';
 import 'package:mp3_android_player/services/default_haptic_filter_service.dart';
+import 'package:mp3_android_player/services/default_preference_service.dart';
 import 'package:mp3_android_player/services/haptic_audio_player_service.dart';
 import 'package:mp3_android_player/services/haptic_filter_service_interface.dart';
+import 'package:mp3_android_player/services/preference_service_interface.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // coverage:ignore-file
 /// Provider for the [AudioFilePickerService].
@@ -59,4 +62,14 @@ final hapticAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
     player.dispose();
   });
   return player;
+});
+
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError("need to override this in main");
+});
+
+/// Provider for the [PreferenceService].
+final preferenceServiceProvider = Provider<PreferenceService>((ref) {
+  final sharedPreferences = ref.watch(sharedPreferencesProvider);
+  return DefaultPreferenceService(sharedPreferences);
 });

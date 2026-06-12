@@ -4,6 +4,7 @@ import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:mp3_android_player/providers.dart';
 import 'package:mp3_android_player/services/audio_file_picker_service_interface.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
+import 'package:mp3_android_player/services/preference_service_interface.dart';
 
 enum PlaybackStatus { playing, paused, stopped }
 
@@ -43,16 +44,25 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
   final AudioPlayerService _defaultAudioPlayerService;
   final AudioPlayerService _hapticAudioPlayerService;
   final AudioFilePickerService _audioFilePickerService;
+  final PreferenceService _preferenceService;
 
   PlayerNotifier({
     required AudioPlayerService audioPlayerService,
     required AudioFilePickerService audioFilePickerService,
     required AudioPlayerService hapticAudioPlayerService,
+    required PreferenceService preferenceService,
   }) : _defaultAudioPlayerService = audioPlayerService,
        _audioFilePickerService = audioFilePickerService,
        _hapticAudioPlayerService = hapticAudioPlayerService,
+       _preferenceService = preferenceService,
        super(PlayerState()) {
     _listenToPosition();
+    _initializeHapticMode();
+  }
+
+  Future<void> _initializeHapticMode() async {
+    final hapticMode = await _preferenceService.getHapticMode();
+    state = state.copyWith(hapticMode: hapticMode);
   }
 
   Future<void> toggleHapticMode(HapticMode mode) async {
@@ -61,6 +71,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     }
     final currentPosition = state.position;
     state = state.copyWith(hapticMode: mode);
+    await _preferenceService.setHapticMode(mode);
     await currentAudioPlayerService.seek(currentPosition);
     if (state.status == PlaybackStatus.playing) {
       resumeOrPlay();
@@ -99,7 +110,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     return state.hapticMode == HapticMode.enabled
         ? _hapticAudioPlayerService
         : _defaultAudioPlayerService;
-  }  
+  }
 
   void _listenToPosition() {
     currentAudioPlayerService.positionStream.listen((pos) {
@@ -113,12 +124,18 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
 
 final playerNotifierProvider =
     StateNotifierProvider<PlayerNotifier, PlayerState>((ref) {
-      final defaultAudioPlayerService = ref.watch(defaultAudioPlayerServiceProvider);
+      final defaultAudioPlayerService = ref.watch(
+        defaultAudioPlayerServiceProvider,
+      );
       final audioFilePickerService = ref.watch(audioFilePickerServiceProvider);
-      final hapticAudioPlayerService = ref.watch(hapticAudioPlayerServiceProvider);
+      final hapticAudioPlayerService = ref.watch(
+        hapticAudioPlayerServiceProvider,
+      );
+      final preferenceService = ref.watch(preferenceServiceProvider);
       return PlayerNotifier(
         audioPlayerService: defaultAudioPlayerService,
         audioFilePickerService: audioFilePickerService,
         hapticAudioPlayerService: hapticAudioPlayerService,
+        preferenceService: preferenceService,
       );
     });

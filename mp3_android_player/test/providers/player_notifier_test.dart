@@ -1,31 +1,39 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
+import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:mp3_android_player/providers.dart';
 import 'package:mp3_android_player/providers/player_notifier.dart';
 import 'package:mp3_android_player/services/audio_file_picker_service_interface.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
+import 'package:mp3_android_player/services/preference_service_interface.dart';
 
 class MockAudioPlayerService extends Mock implements AudioPlayerService {}
 
 class MockAudioFilePickerService extends Mock
     implements AudioFilePickerService {}
 
+class MockPreferenceService extends Mock implements PreferenceService {}
+
 void main() {
   late MockAudioPlayerService mockAudioPlayerService;
   late MockAudioFilePickerService mockAudioFilePickerService;
+  late MockPreferenceService mockPreferenceService;
   late ProviderContainer container;
 
   setUpAll(() {
     registerFallbackValue(
       AudioFile(path: '', name: '', duration: Duration.zero),
     );
+    registerFallbackValue(HapticMode.disabled);
   });
 
   setUp(() {
     mockAudioPlayerService = MockAudioPlayerService();
     mockAudioFilePickerService = MockAudioFilePickerService();
+    mockPreferenceService = MockPreferenceService();
     final mockHapticAudioPlayerService = MockAudioPlayerService();
 
     // Setup default stream behaviors
@@ -41,6 +49,12 @@ void main() {
     when(
       () => mockHapticAudioPlayerService.durationStream,
     ).thenAnswer((_) => Stream.value(Duration.zero));
+    when(
+      () => mockPreferenceService.getHapticMode(),
+    ).thenAnswer((_) async => HapticMode.disabled);
+    when(
+      () => mockPreferenceService.setHapticMode(any()),
+    ).thenAnswer((_) async => {});
 
     container = ProviderContainer(
       overrides: [
@@ -53,6 +67,7 @@ void main() {
         hapticAudioPlayerServiceProvider.overrideWithValue(
           mockHapticAudioPlayerService,
         ),
+        preferenceServiceProvider.overrideWithValue(mockPreferenceService),
       ],
     );
   });

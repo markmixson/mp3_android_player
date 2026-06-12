@@ -5,11 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
+import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:mp3_android_player/player_app.dart';
 import 'package:mp3_android_player/providers.dart';
 import 'package:mp3_android_player/providers/player_notifier.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
 import 'package:mp3_android_player/services/audio_file_picker_service_interface.dart';
+import 'package:mp3_android_player/services/preference_service_interface.dart';
 import 'package:mp3_android_player/ui/player_screen.dart';
 
 class MockAudioService extends Mock implements AudioPlayerService {}
@@ -17,6 +19,8 @@ class MockAudioService extends Mock implements AudioPlayerService {}
 class MockHapticAudioPlayerService extends Mock implements AudioPlayerService {}
 
 class MockFilePickerService extends Mock implements AudioFilePickerService {}
+
+class MockPreferenceService extends Mock implements PreferenceService {}
 
 late ProviderContainer container;
 
@@ -26,6 +30,7 @@ void main() {
   late MockFilePickerService filePickerService;
   late StreamController<Duration> positionController;
   late StreamController<Duration> durationController;
+  late MockPreferenceService preferenceService;
 
   const audioFile = AudioFile(
     path: 'test/path/to/audio.mp3',
@@ -36,6 +41,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(audioFile);
     registerFallbackValue(Duration.zero);
+    registerFallbackValue(HapticMode.disabled);
   });
 
   tearDown(() {
@@ -49,8 +55,8 @@ void main() {
     filePickerService = MockFilePickerService();
     positionController = StreamController<Duration>.broadcast();
     durationController = StreamController<Duration>.broadcast();
+    preferenceService = MockPreferenceService();
 
-    // 1. Stub all Streams
     when(
       () => audioService.positionStream,
     ).thenAnswer((_) => positionController.stream);
@@ -64,7 +70,6 @@ void main() {
       () => hapticAudioService.durationStream,
     ).thenAnswer((_) => durationController.stream);
 
-    // 2. Stub all required Async methods to return Future<void> (NOT null)
     when(() => audioService.pause()).thenAnswer((_) async => {});
     when(() => audioService.resume()).thenAnswer((_) async => {});
     when(() => audioService.play(any())).thenAnswer((_) async => {});
@@ -74,18 +79,22 @@ void main() {
     when(() => hapticAudioService.play(any())).thenAnswer((_) async => {});
     when(() => hapticAudioService.seek(any())).thenAnswer((_) async {});
 
-    // 3. Stub required getters that return primitives/non-futures
     when(() => audioService.hasAudioSource).thenReturn(true);
     when(() => hapticAudioService.hasAudioSource).thenReturn(true);
-
-    // 4. Stub the file picker to return a valid file by default to avoid Null errors
     when(() => filePickerService.pickFile()).thenAnswer((_) async => audioFile);
+    when(
+      () => preferenceService.getHapticMode(),
+    ).thenAnswer((_) async => HapticMode.disabled);
+        when(
+      () => preferenceService.setHapticMode(any()),
+    ).thenAnswer((_) async => {});
 
     container = ProviderContainer(
       overrides: [
         defaultAudioPlayerServiceProvider.overrideWithValue(audioService),
         hapticAudioPlayerServiceProvider.overrideWithValue(hapticAudioService),
         audioFilePickerServiceProvider.overrideWithValue(filePickerService),
+        preferenceServiceProvider.overrideWithValue(preferenceService),
       ],
     );
     addTearDown(container.dispose);
@@ -174,6 +183,7 @@ void main() {
     );
 
     testWidgets('haptic mode toggle switches between services', (tester) async {
+      
       await tester.pumpWidget(buildPlayerScreen());
 
       await tester.tap(find.byIcon(Icons.file_present));
