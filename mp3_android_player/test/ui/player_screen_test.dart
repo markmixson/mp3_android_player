@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
 import 'package:mp3_android_player/models/haptic_mode.dart';
+import 'package:mp3_android_player/models/player_state.dart';
+import 'package:mp3_android_player/models/player_status.dart';
 import 'package:mp3_android_player/player_app.dart';
 import 'package:mp3_android_player/providers.dart';
 import 'package:mp3_android_player/providers/player_notifier.dart';
