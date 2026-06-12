@@ -30,7 +30,7 @@ class DefaultHapticFilterService implements HapticFilterService {
     final tempDir = await _temporaryDirectoryHelper.getTemporaryDirectory();
     final time = _clock.now().millisecondsSinceEpoch;
     final ext = p.extension(audioFile.path);
-    final outputPath = p.join(tempDir.path, 'haptic_$time.$ext');
+    final outputPath = p.join(tempDir.path, 'haptic_$time$ext');
 
     _tempFiles.add(outputPath);
 
