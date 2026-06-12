@@ -15,7 +15,7 @@ class PlayerScreen extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final state = ref.watch(playerNotifierProvider).requireValue;
+    final state = ref.watch(playerNotifierProvider);
     final notifier = ref.read(playerNotifierProvider.notifier);
     final defaultAudioPlayerService = ref.read(defaultAudioPlayerServiceProvider);
     final hapticAudioPlayerService = ref.read(hapticAudioPlayerServiceProvider);

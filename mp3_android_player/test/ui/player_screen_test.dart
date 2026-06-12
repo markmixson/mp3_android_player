@@ -179,8 +179,9 @@ void main() {
       await tester.tap(find.byIcon(Icons.file_present));
       await tester.pumpAndSettle();
 
-      container.read(playerNotifierProvider.notifier).state = AsyncValue.data(
-        PlayerState(currentFile: audioFile, status: PlaybackStatus.playing),
+      container.read(playerNotifierProvider.notifier).state = PlayerState(
+        currentFile: audioFile,
+        status: PlaybackStatus.playing,
       );
       await tester.pumpAndSettle();
 

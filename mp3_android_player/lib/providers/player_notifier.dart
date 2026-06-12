@@ -39,7 +39,7 @@ class PlayerState {
   }
 }
 
-class PlayerNotifier extends StateNotifier<AsyncValue<PlayerState>> {
+class PlayerNotifier extends StateNotifier<PlayerState> {
   final AudioPlayerService _defaultAudioPlayerService;
   final AudioPlayerService _hapticAudioPlayerService;
   final AudioFilePickerService _audioFilePickerService;
@@ -51,18 +51,18 @@ class PlayerNotifier extends StateNotifier<AsyncValue<PlayerState>> {
   }) : _defaultAudioPlayerService = audioPlayerService,
        _audioFilePickerService = audioFilePickerService,
        _hapticAudioPlayerService = hapticAudioPlayerService,
-       super(AsyncValue.data(PlayerState())) {
+       super(PlayerState()) {
     _listenToPosition();
   }
 
   Future<void> toggleHapticMode(HapticMode mode) async {
-    if (state.requireValue.status == PlaybackStatus.playing) {
+    if (state.status == PlaybackStatus.playing) {
       currentAudioPlayerService.pause();
     }
-    final currentPosition = state.requireValue.position;
-    state = AsyncValue.data(state.requireValue.copyWith(hapticMode: mode));
+    final currentPosition = state.position;
+    state = state.copyWith(hapticMode: mode);
     await currentAudioPlayerService.seek(currentPosition);
-    if (state.requireValue.status == PlaybackStatus.playing) {
+    if (state.status == PlaybackStatus.playing) {
       resumeOrPlay();
     }
   }
@@ -71,18 +71,18 @@ class PlayerNotifier extends StateNotifier<AsyncValue<PlayerState>> {
     final file = await _audioFilePickerService.pickFile();
     if (file != null) {
       await currentAudioPlayerService.play(file);
-      state = AsyncValue.data(state.requireValue.copyWith(currentFile: file, status: PlaybackStatus.playing));
+      state = state.copyWith(currentFile: file, status: PlaybackStatus.playing);
     }
   }
 
   Future<void> togglePlayPause() async {
-    if (state.requireValue.status == PlaybackStatus.playing) {
+    if (state.status == PlaybackStatus.playing) {
       currentAudioPlayerService.pause();
-      state = AsyncValue.data(state.requireValue.copyWith(status: PlaybackStatus.paused));
+      state = state.copyWith(status: PlaybackStatus.paused);
     } else {
-      if (state.requireValue.currentFile != null) {
+      if (state.currentFile != null) {
         resumeOrPlay();
-        state = AsyncValue.data(state.requireValue.copyWith(status: PlaybackStatus.playing));
+        state = state.copyWith(status: PlaybackStatus.playing);
       }
     }
   }
@@ -91,28 +91,28 @@ class PlayerNotifier extends StateNotifier<AsyncValue<PlayerState>> {
     if (currentAudioPlayerService.hasAudioSource) {
       currentAudioPlayerService.resume();
     } else {
-      currentAudioPlayerService.play(state.requireValue.currentFile!);
+      currentAudioPlayerService.play(state.currentFile!);
     }
   }
 
   AudioPlayerService get currentAudioPlayerService {
-    return state.requireValue.hapticMode == HapticMode.enabled
+    return state.hapticMode == HapticMode.enabled
         ? _hapticAudioPlayerService
         : _defaultAudioPlayerService;
   }  
 
   void _listenToPosition() {
     currentAudioPlayerService.positionStream.listen((pos) {
-      state = AsyncValue.data(state.requireValue.copyWith(position: pos));
+      state = state.copyWith(position: pos);
     });
     currentAudioPlayerService.durationStream.listen((dur) {
-      state = AsyncValue.data(state.requireValue.copyWith(duration: dur));
+      state = state.copyWith(duration: dur);
     });
   }
 }
 
 final playerNotifierProvider =
-    StateNotifierProvider<PlayerNotifier, AsyncValue<PlayerState>>((ref) {
+    StateNotifierProvider<PlayerNotifier, PlayerState>((ref) {
       final defaultAudioPlayerService = ref.watch(defaultAudioPlayerServiceProvider);
       final audioFilePickerService = ref.watch(audioFilePickerServiceProvider);
       final hapticAudioPlayerService = ref.watch(hapticAudioPlayerServiceProvider);

@@ -69,7 +69,7 @@ void main() {
     );
 
     test('initial state should be stopped', () {
-      final state = container.read(playerNotifierProvider).requireValue;
+      final state = container.read(playerNotifierProvider);
       expect(state.status, PlaybackStatus.stopped);
       expect(state.currentFile, isNull);
     });
@@ -85,22 +85,22 @@ void main() {
       final notifier = container.read(playerNotifierProvider.notifier);
       await notifier.pickAndPlayFile();
 
-      expect(notifier.state.requireValue.currentFile, testFile);
-      expect(notifier.state.requireValue.status, PlaybackStatus.playing);
+      expect(notifier.state.currentFile, testFile);
+      expect(notifier.state.status, PlaybackStatus.playing);
       verify(() => mockAudioPlayerService.play(testFile)).called(1);
     });
 
     test('togglePlayPause should pause when playing', () async {
       when(() => mockAudioPlayerService.pause()).thenAnswer((_) async => {});
-      container.read(playerNotifierProvider.notifier).state = AsyncValue.data(PlayerState(
+      container.read(playerNotifierProvider.notifier).state = PlayerState(
         currentFile: testFile,
         status: PlaybackStatus.playing,
-      ));
+      );
 
       await container.read(playerNotifierProvider.notifier).togglePlayPause();
 
       expect(
-        container.read(playerNotifierProvider).requireValue.status,
+        container.read(playerNotifierProvider).status,
         PlaybackStatus.paused,
       );
       verify(() => mockAudioPlayerService.pause()).called(1);
@@ -109,15 +109,15 @@ void main() {
     test('togglePlayPause should play when paused', () async {
       when(() => mockAudioPlayerService.hasAudioSource).thenReturn(true);
       when(() => mockAudioPlayerService.resume()).thenAnswer((_) async => {});
-      container.read(playerNotifierProvider.notifier).state = AsyncValue.data(PlayerState(
+      container.read(playerNotifierProvider.notifier).state = PlayerState(
         currentFile: testFile,
         status: PlaybackStatus.paused,
-      ));
+      );
 
       await container.read(playerNotifierProvider.notifier).togglePlayPause();
 
       expect(
-        container.read(playerNotifierProvider).requireValue.status,
+        container.read(playerNotifierProvider).status,
         PlaybackStatus.playing,
       );
       verify(() => mockAudioPlayerService.resume()).called(1);
@@ -134,10 +134,10 @@ void main() {
         final notifier = container.read(playerNotifierProvider.notifier);
 
         // Set the state to include a currentFile so the ! operator doesn't fail
-        notifier.state = AsyncValue.data(PlayerState(
+        notifier.state = PlayerState(
           currentFile: audioFile,
           status: PlaybackStatus.stopped,
-        ));
+        );
 
         when(() => mockAudioPlayerService.hasAudioSource).thenReturn(false);
         when(
