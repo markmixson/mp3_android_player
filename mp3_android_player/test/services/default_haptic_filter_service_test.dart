@@ -86,6 +86,7 @@ void main() {
       test(
         'should delete all files in the temp list when they exist',
         () async {
+          final hapticFile = 'haptic_123.mp3';
           final mockFile = MockFile();
           when(() => mockAudioFile.path).thenReturn('test.mp3');
           when(
@@ -96,7 +97,8 @@ void main() {
           ).thenAnswer((_) async => MockFFmpegSession());
           when(() => mockClock.now()).thenReturn(DateTime(2026, 6, 11));
 
-          await service.applyHapticFilter(mockAudioFile, (session) async => 'haptic_123.mp3');
+          final result = await service.applyHapticFilter(mockAudioFile, (session) async => hapticFile);
+          expect(result, equals(hapticFile));
 
           when(() => mockFileHelper.getFile(any())).thenReturn(mockFile);
           when(() => mockFile.exists()).thenAnswer((_) async => true);

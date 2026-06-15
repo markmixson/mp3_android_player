@@ -43,6 +43,8 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
       final contentType = _mimeHelper.getMimeType(processedPath, defaultType);
       final source = HapticStreamAudioSource(file, contentType);
       await _player.setAudioSource(source);
+      debugPrint("player source initialized for $processedPath, $file of type $contentType");
+      return processedPath;
     }));
   }
 }
