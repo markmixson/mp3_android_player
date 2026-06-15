@@ -33,7 +33,7 @@ class DefaultHapticFilterService implements HapticFilterService {
     final ext = p.extension(path);
     final outputPath = p.join(tempDir.path, 'haptic_$time$ext');
     _tempFiles.add(outputPath);
-    final options = "-y -af lowpass=f=500 -i $path $outputPath";
+    final options = "-i $path -y -af lowpass=f=500 $outputPath";
     debugPrint("going to play file with these options: $options");
     // Apply a low-pass filter at 500Hz
     return _ffmpegHelper
