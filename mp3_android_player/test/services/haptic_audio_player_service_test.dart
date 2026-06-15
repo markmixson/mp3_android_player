@@ -9,6 +9,7 @@ import 'package:mp3_android_player/models/audio_file.dart';
 import 'package:mp3_android_player/services/haptic_filter_service_interface.dart';
 import 'package:mp3_android_player/services/haptic_audio_player_service.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
 
 class MockAudioPlayer extends Mock implements AudioPlayer {}
 
@@ -74,10 +75,11 @@ void main() {
           final Map<String, dynamic> mapParams = params as Map<String, dynamic>;
           final String inputPath = mapParams['path'];
           final String processedPath = 'processed_path.mp3';
+          final String hapticPath = 'haptic_1234.mp3';
 
           when(() => mockAudioFile.path).thenReturn(inputPath);
           when(
-            () => mockHapticFilter.applyHapticFilter(any()),
+            () => mockHapticFilter.applyHapticFilter(any(), any()),
           ).thenAnswer((_) async => processedPath);
           when(() => mockFileHelper.getFile(any())).thenReturn(MockFile());
           when(
@@ -90,10 +92,30 @@ void main() {
 
           await service.play(mockAudioFile);
 
+          final Function(String) captured =
+              verify(
+                    () => mockHapticFilter.applyHapticFilter(
+                      mockAudioFile,
+                      captureAny(),
+                    ),
+                  ).captured.last
+                  as Function(String);
+          captured.call(hapticPath);
+
           verify(
-            () => mockHapticFilter.applyHapticFilter(mockAudioFile),
+            () => mockFileHelper.getFile(any(that: equals(hapticPath))),
           ).called(1);
-          verify(() => mockPlayer.setAudioSource(any())).called(1);
+          verify(
+            () => mockMime.getMimeType(
+              any(that: equals(hapticPath)),
+              any(that: equals(HapticAudioPlayerService.defaultType)),
+            ),
+          ).called(1);
+          verify(
+            () => mockPlayer.setAudioSource(
+              any(that: isA<HapticStreamAudioSource>()),
+            ),
+          ).called(1);
           verify(() => mockPlayer.play()).called(1);
         },
         [
@@ -106,7 +128,7 @@ void main() {
         // Arrange
         when(() => mockAudioFile.path).thenReturn('error.mp3');
         when(
-          () => mockHapticFilter.applyHapticFilter(any()),
+          () => mockHapticFilter.applyHapticFilter(any(), any()),
         ).thenThrow(Exception('Filter Error'));
 
         expect(() => service.play(mockAudioFile), throwsA(isA<Exception>()));

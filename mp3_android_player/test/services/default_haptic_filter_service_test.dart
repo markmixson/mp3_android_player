@@ -73,7 +73,7 @@ void main() {
           ).thenAnswer((_) async => MockFFmpegSession());
           when(() => mockClock.now()).thenReturn(DateTime(2026, 6, 11));
 
-          final result = await service.applyHapticFilter(mockAudioFile);
+          final result = await service.applyHapticFilter(mockAudioFile, (session) async => 'haptic_123$expectedExt');
 
           expect(result, contains(expectedExt));
           expect(result, contains('haptic_'));
@@ -96,7 +96,7 @@ void main() {
           ).thenAnswer((_) async => MockFFmpegSession());
           when(() => mockClock.now()).thenReturn(DateTime(2026, 6, 11));
 
-          await service.applyHapticFilter(mockAudioFile);
+          await service.applyHapticFilter(mockAudioFile, (session) async => 'haptic_123.mp3');
 
           when(() => mockFileHelper.getFile(any())).thenReturn(mockFile);
           when(() => mockFile.exists()).thenAnswer((_) async => true);
@@ -121,7 +121,7 @@ void main() {
           ).thenAnswer((_) async => MockFFmpegSession());
           when(() => mockClock.now()).thenReturn(DateTime(2026, 6, 11));
 
-          await service.applyHapticFilter(mockAudioFile);
+          await service.applyHapticFilter(mockAudioFile, (session) async => 'haptic_123.mp3');
 
           when(() => mockFileHelper.getFile(any())).thenReturn(mockFile);
           when(() => mockFile.exists()).thenAnswer((_) async => true);
@@ -144,7 +144,7 @@ void main() {
           ).thenAnswer((_) async => MockFFmpegSession());
           when(() => mockClock.now()).thenReturn(DateTime(2026, 6, 11));
 
-          await service.applyHapticFilter(mockAudioFile);
+          await service.applyHapticFilter(mockAudioFile, (session) async => 'haptic_123.mp3');
 
           when(() => mockFileHelper.getFile(any())).thenReturn(mockFile);
           when(() => mockFile.exists()).thenAnswer((_) async => false);

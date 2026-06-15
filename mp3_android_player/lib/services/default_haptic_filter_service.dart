@@ -26,7 +26,7 @@ class DefaultHapticFilterService implements HapticFilterService {
        _fileHelper = fileHelper;
 
   @override
-  Future<String> applyHapticFilter(final AudioFile audioFile) async {
+  Future<String> applyHapticFilter(final AudioFile audioFile, final Function(String) sourceSetter) async {
     final tempDir = await _temporaryDirectoryHelper.getTemporaryDirectory();
     final time = _clock.now().millisecondsSinceEpoch;
     final path = audioFile.path;
@@ -38,7 +38,7 @@ class DefaultHapticFilterService implements HapticFilterService {
     // Apply a low-pass filter at 500Hz
     return _ffmpegHelper
         .executeAsync(_tempFiles, outputPath, options)
-        .then((session) => outputPath);
+        .then((session) => sourceSetter.call(outputPath));
   }
 
   @override

@@ -36,12 +36,13 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   }
 
   Future<void> _setupPlayer(final AudioFile audioFile) async {
-    final processedPath = await _hapticFilterService.applyHapticFilter(
-      audioFile,
-    );
-    final file = _fileHelper.getFile(processedPath);
-    final contentType = _mimeHelper.getMimeType(processedPath, defaultType);
-    final source = HapticStreamAudioSource(file, contentType);
-    await _player.setAudioSource(source);
+    await _hapticFilterService.applyHapticFilter(audioFile, ((
+      processedPath,
+    ) async {
+      final file = _fileHelper.getFile(processedPath);
+      final contentType = _mimeHelper.getMimeType(processedPath, defaultType);
+      final source = HapticStreamAudioSource(file, contentType);
+      await _player.setAudioSource(source);
+    }));
   }
 }
