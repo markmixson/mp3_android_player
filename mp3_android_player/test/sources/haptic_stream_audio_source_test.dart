@@ -52,7 +52,7 @@ void main() {
 
         test(description, () async {
           when(() => mockFile.length()).thenAnswer((_) async => fileLength.toInt());
-          when(() => mockFile.openRead()).thenAnswer((_) => Stream.value(List.filled(10, 0)));
+          when(() => mockFile.openRead(any(), any())).thenAnswer((_) => Stream.value(List.filled(10, 0)));
           final source = HapticStreamAudioSource(mockFile, testContentType);
 
           final response = await source.request(start, end);

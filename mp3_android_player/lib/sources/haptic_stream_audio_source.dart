@@ -19,7 +19,7 @@ class HapticStreamAudioSource extends StreamAudioSource {
       sourceLength: length,
       contentLength: (end ?? length) - (start ?? 0),
       offset: start ?? 0,
-      stream: _file.openRead(),
+      stream: _file.openRead(start, end),
       contentType: _contentType,
     );
   }
