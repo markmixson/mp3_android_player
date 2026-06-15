@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:mp3_android_player/models/audio_file.dart';
 
 // coverage:ignore-file
