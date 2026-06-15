@@ -38,7 +38,7 @@ class DefaultHapticFilterService implements HapticFilterService {
     // Apply a low-pass filter at 500Hz
     return _ffmpegHelper
         .executeAsync(_tempFiles, outputPath, options)
-        .then((session) => sourceSetter.call(outputPath));
+        .then((output) async => sourceSetter.call(output));
   }
 
   @override

@@ -71,7 +71,7 @@ void main() {
       ).thenAnswer((_) async => 'Error details');
 
       expect(
-        () => ffmpegHelper.executeAsync(tempFilesPath, outputPath, command),
+        ffmpegHelper.executeAsync(tempFilesPath, outputPath, command),
         throwsA(
           isA<Exception>().having(
             (e) => e.toString(),
