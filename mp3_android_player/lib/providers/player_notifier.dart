@@ -39,7 +39,6 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     final currentPosition = state.position;
     state = state.copyWith(hapticMode: mode);
     await _preferenceService.setHapticMode(mode);
-    _listenToPosition();
     await currentAudioPlayerService.seek(currentPosition);
     if (state.status == PlaybackStatus.playing) {
       resumeOrPlay();
@@ -82,10 +81,16 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
   }
 
   void _listenToPosition() {
-    currentAudioPlayerService.positionStream.listen((pos) {
+    _defaultAudioPlayerService.positionStream.listen((pos) {
       state = state.copyWith(position: pos);
     });
-    currentAudioPlayerService.durationStream.listen((dur) {
+    _defaultAudioPlayerService.durationStream.listen((dur) {
+      state = state.copyWith(duration: dur);
+    });
+    _hapticAudioPlayerService.positionStream.listen((pos) {
+      state = state.copyWith(position: pos);
+    });
+    _hapticAudioPlayerService.durationStream.listen((dur) {
       state = state.copyWith(duration: dur);
     });
   }
