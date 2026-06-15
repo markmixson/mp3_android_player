@@ -19,10 +19,11 @@ class MockAudioFilePickerService extends Mock
 class MockPreferenceService extends Mock implements PreferenceService {}
 
 void main() {
-  late MockAudioPlayerService mockAudioPlayerService;
+  late MockAudioPlayerService mockDefaultAudioPlayerService;
   late MockAudioFilePickerService mockAudioFilePickerService;
   late MockPreferenceService mockPreferenceService;
   late ProviderContainer container;
+  late MockAudioPlayerService mockHapticAudioPlayerService;
 
   setUpAll(() {
     registerFallbackValue(
@@ -32,17 +33,17 @@ void main() {
   });
 
   setUp(() {
-    mockAudioPlayerService = MockAudioPlayerService();
+    mockDefaultAudioPlayerService = MockAudioPlayerService();
     mockAudioFilePickerService = MockAudioFilePickerService();
     mockPreferenceService = MockPreferenceService();
-    final mockHapticAudioPlayerService = MockAudioPlayerService();
+    mockHapticAudioPlayerService = MockAudioPlayerService();
 
     // Setup default stream behaviors
     when(
-      () => mockAudioPlayerService.positionStream,
+      () => mockDefaultAudioPlayerService.positionStream,
     ).thenAnswer((_) => Stream.value(Duration.zero));
     when(
-      () => mockAudioPlayerService.durationStream,
+      () => mockDefaultAudioPlayerService.durationStream,
     ).thenAnswer((_) => Stream.value(Duration.zero));
     when(
       () => mockHapticAudioPlayerService.positionStream,
@@ -60,7 +61,7 @@ void main() {
     container = ProviderContainer(
       overrides: [
         defaultAudioPlayerServiceProvider.overrideWithValue(
-          mockAudioPlayerService,
+          mockDefaultAudioPlayerService,
         ),
         audioFilePickerServiceProvider.overrideWithValue(
           mockAudioFilePickerService,
@@ -95,19 +96,23 @@ void main() {
         () => mockAudioFilePickerService.pickFile(),
       ).thenAnswer((_) async => testFile);
       when(
-        () => mockAudioPlayerService.play(any()),
+        () => mockDefaultAudioPlayerService.play(any()),
       ).thenAnswer((_) async => {});
 
       final notifier = container.read(playerNotifierProvider.notifier);
+
       await notifier.pickAndPlayFile();
 
       expect(notifier.state.currentFile, testFile);
       expect(notifier.state.status, PlaybackStatus.playing);
-      verify(() => mockAudioPlayerService.play(testFile)).called(1);
+      verify(() => mockDefaultAudioPlayerService.play(testFile)).called(1);
+      verify(() => mockHapticAudioPlayerService.initialize(testFile)).called(1);
     });
 
     test('togglePlayPause should pause when playing', () async {
-      when(() => mockAudioPlayerService.pause()).thenAnswer((_) async => {});
+      when(
+        () => mockDefaultAudioPlayerService.pause(),
+      ).thenAnswer((_) async => {});
       container.read(playerNotifierProvider.notifier).state = PlayerState(
         currentFile: testFile,
         status: PlaybackStatus.playing,
@@ -119,12 +124,14 @@ void main() {
         container.read(playerNotifierProvider).status,
         PlaybackStatus.paused,
       );
-      verify(() => mockAudioPlayerService.pause()).called(1);
+      verify(() => mockDefaultAudioPlayerService.pause()).called(1);
     });
 
     test('togglePlayPause should play when paused', () async {
-      when(() => mockAudioPlayerService.hasAudioSource).thenReturn(true);
-      when(() => mockAudioPlayerService.resume()).thenAnswer((_) async => {});
+      when(() => mockDefaultAudioPlayerService.hasAudioSource).thenReturn(true);
+      when(
+        () => mockDefaultAudioPlayerService.resume(),
+      ).thenAnswer((_) async => {});
       container.read(playerNotifierProvider.notifier).state = PlayerState(
         currentFile: testFile,
         status: PlaybackStatus.paused,
@@ -136,7 +143,7 @@ void main() {
         container.read(playerNotifierProvider).status,
         PlaybackStatus.playing,
       );
-      verify(() => mockAudioPlayerService.resume()).called(1);
+      verify(() => mockDefaultAudioPlayerService.resume()).called(1);
     });
 
     test(
@@ -155,27 +162,31 @@ void main() {
           status: PlaybackStatus.stopped,
         );
 
-        when(() => mockAudioPlayerService.hasAudioSource).thenReturn(false);
         when(
-          () => mockAudioPlayerService.play(any()),
+          () => mockDefaultAudioPlayerService.hasAudioSource,
+        ).thenReturn(false);
+        when(
+          () => mockDefaultAudioPlayerService.play(any()),
         ).thenAnswer((_) async => {});
 
         // Act
         await notifier.resumeOrPlay();
 
-        verify(() => mockAudioPlayerService.play(audioFile)).called(1);
+        verify(() => mockDefaultAudioPlayerService.play(audioFile)).called(1);
       },
     );
 
     test(
       'resumeOrPlay should call resume() when hasAudioSource is true',
       () async {
-        when(() => mockAudioPlayerService.hasAudioSource).thenReturn(true);
+        when(
+          () => mockDefaultAudioPlayerService.hasAudioSource,
+        ).thenReturn(true);
         final notifier = container.read(playerNotifierProvider.notifier);
 
         await notifier.resumeOrPlay();
 
-        verify(() => mockAudioPlayerService.resume()).called(1);
+        verify(() => mockDefaultAudioPlayerService.resume()).called(1);
       },
     );
   });

@@ -28,17 +28,17 @@ void main() {
   });
 
   group('DefaultAudioPlayerService', () {
-    test('play calls setFilePath and play on the underlying player', () async {
-      when(() => mockAudioPlayer.setFilePath(any())).thenAnswer((_) async {
-        return null;
-      });
-      when(() => mockAudioPlayer.play()).thenAnswer((_) async {});
+    test(
+      'initialize calls setFilePath and not play on the underlying player',
+      () async {
+        when(() => mockAudioPlayer.setFilePath(any())).thenAnswer((_) async {
+          return null;
+        });
+        audioPlayerService.initialize(audioFile);
 
-      await audioPlayerService.play(audioFile);
-
-      verify(() => mockAudioPlayer.setFilePath(audioFile.path)).called(1);
-      verify(() => mockAudioPlayer.play()).called(1);
-    });
+        verify(() => mockAudioPlayer.setFilePath(audioFile.path)).called(1);
+      },
+    );
 
     test('pause calls pause on the underlying player', () async {
       when(() => mockAudioPlayer.pause()).thenAnswer((_) async => {});
@@ -95,17 +95,13 @@ void main() {
       expect(stream, isA<Stream<Duration>>());
     });
 
-    test('play rethrows error when setFilePath fails', () async {
-      when(
-        () => mockAudioPlayer.setFilePath(any()),
-      ).thenThrow(Exception('Failed to set file path'));
+    test('play rethrows error when it fails', () async {
+      when(() => mockAudioPlayer.play()).thenThrow(Exception('Failed'));
 
       expect(
         () => audioPlayerService.play(audioFile),
         throwsA(isA<Exception>()),
       );
-
-      verify(() => mockAudioPlayer.setFilePath(audioFile.path)).called(1);
     });
 
     test('dispose calls dispose on the underlying player', () {

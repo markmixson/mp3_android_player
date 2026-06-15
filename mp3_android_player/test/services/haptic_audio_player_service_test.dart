@@ -90,7 +90,9 @@ void main() {
           ).thenAnswer((_) async => null);
           when(() => mockPlayer.play()).thenAnswer((_) async => {});
 
-          await service.play(mockAudioFile);
+          service.initialize(mockAudioFile);
+
+          service.play(mockAudioFile);
 
           final Function(String) captured =
               verify(
@@ -116,6 +118,7 @@ void main() {
               any(that: isA<HapticStreamAudioSource>()),
             ),
           ).called(1);
+
           verify(() => mockPlayer.play()).called(1);
         },
         [
@@ -131,7 +134,10 @@ void main() {
           () => mockHapticFilter.applyHapticFilter(any(), any()),
         ).thenThrow(Exception('Filter Error'));
 
-        expect(() => service.play(mockAudioFile), throwsA(isA<Exception>()));
+        expect(
+          () => service.initialize(mockAudioFile),
+          throwsA(isA<Exception>()),
+        );
         verifyNever(() => mockPlayer.play());
       });
     });

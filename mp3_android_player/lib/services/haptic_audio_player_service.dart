@@ -25,17 +25,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
        _fileHelper = fileHelper;
 
   @override
-  Future<void> play(final AudioFile audioFile) async {
-    try {
-      await _setupPlayer(audioFile);
-      _player.play();
-    } catch (e) {
-      debugPrint('Error playing audio: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> _setupPlayer(final AudioFile audioFile) async {
+  void initialize(final AudioFile audioFile) async {
     await _hapticFilterService.applyHapticFilter(audioFile, ((
       processedPath,
     ) async {
