@@ -43,7 +43,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
   Future<void> pickAndPlayFile() async {
     final file = await _audioFilePickerService.pickFile();
     if (file != null) {
-      state = state.copyWith(isLoading: true);
+      state = state.copyWith(currentFile: file, isLoading: true);
       final myCurrentService = currentAudioPlayerService;
       await _hapticAudioPlayerService.initialize(file);
       await _defaultAudioPlayerService.initialize(file);

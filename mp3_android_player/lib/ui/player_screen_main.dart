@@ -28,7 +28,7 @@ Widget getMainScreen(
       ? Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(),
+            const CircularProgressIndicator(padding: EdgeInsets.only(bottom: 10.0),),
             Text(
               state.currentFile != null
                   ? "Loading ${state.currentFile!.name}..."
