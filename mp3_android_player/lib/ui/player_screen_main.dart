@@ -25,7 +25,17 @@ Widget getMainScreen(
       ? hapticAudioPlayerService
       : defaultAudioPlayerService;
   return state.isLoading
-      ? const CircularProgressIndicator()
+      ? Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            Text(
+              state.currentFile != null
+                  ? "Loading ${state.currentFile!.name}..."
+                  : "Loading...",
+            ),
+          ],
+        )
       : Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

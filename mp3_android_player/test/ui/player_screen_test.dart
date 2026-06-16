@@ -265,4 +265,25 @@ void main() {
       verify(() => audioService.seek(const Duration(seconds: 5))).called(1);
     });
   });
+
+  for (final (bool isLoading, AudioFile? currentFile, String expectedText) in [
+    (true, null, 'Loading...'),
+    (true, audioFile, 'Loading test.mp3...'),
+  ]) {
+    testWidgets(
+      'shows loading indicator and "$expectedText" when isLoading=$isLoading and currentFile=${currentFile != null}',
+      (tester) async {
+        container.read(playerNotifierProvider.notifier).state = PlayerState(
+          isLoading: isLoading,
+          currentFile: currentFile,
+          status: PlaybackStatus.stopped
+        );
+        await tester.pumpWidget(buildPlayerScreen());
+        await tester.pump();
+
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.text(expectedText), findsOneWidget);
+      },
+    );
+  }
 }
