@@ -108,7 +108,7 @@ void main() {
       ).thenAnswer((_) async => {});
       final notifier = container.read(playerNotifierProvider.notifier);
 
-      await notifier.pickAndPlayFile();
+      await notifier.pickAndPlayFile(mockPreferenceService);
 
       expect(notifier.state.currentFile, testFile);
       expect(notifier.state.status, PlaybackStatus.playing);

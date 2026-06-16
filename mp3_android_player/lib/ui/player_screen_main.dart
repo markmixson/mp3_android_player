@@ -94,7 +94,7 @@ Widget getMainScreen(
                 const SizedBox(width: 20),
                 IconButton(
                   icon: const Icon(Icons.file_present),
-                  onPressed: () async => notifier.pickAndPlayFile(),
+                  onPressed: () async => notifier.pickAndPlayFile(prefs),
                   enableFeedback: false,
                 ),
                 IconButton(
