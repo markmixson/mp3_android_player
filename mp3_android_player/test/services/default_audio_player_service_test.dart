@@ -6,9 +6,12 @@ import 'package:mp3_android_player/services/default_audio_player_service.dart';
 
 class MockAudioPlayer extends Mock implements AudioPlayer {}
 
+class MockAudioSource extends Mock implements AudioSource {}
+
 void main() {
   late DefaultAudioPlayerService audioPlayerService;
   late MockAudioPlayer mockAudioPlayer;
+  late MockAudioSource mockAudioSource;
   final audioFile = AudioFile(
     path: 'test/path/to/audio.mp3',
     name: 'test.mp3',
@@ -18,23 +21,24 @@ void main() {
   setUp(() {
     mockAudioPlayer = MockAudioPlayer();
     audioPlayerService = DefaultAudioPlayerService(player: mockAudioPlayer);
+    mockAudioSource = MockAudioSource();
 
     registerFallbackValue(audioFile);
     registerFallbackValue(Duration.zero);
   });
 
   group('DefaultAudioPlayerService', () {
-    test('play calls setFilePath and play on the underlying player', () async {
-      when(() => mockAudioPlayer.setFilePath(any())).thenAnswer((_) async {
-        return null;
-      });
-      when(() => mockAudioPlayer.play()).thenAnswer((_) async {});
+    test(
+      'initialize calls setFilePath and not play on the underlying player',
+      () async {
+        when(() => mockAudioPlayer.setFilePath(any())).thenAnswer((_) async {
+          return null;
+        });
+        audioPlayerService.initialize(audioFile);
 
-      await audioPlayerService.play(audioFile);
-
-      verify(() => mockAudioPlayer.setFilePath(audioFile.path)).called(1);
-      verify(() => mockAudioPlayer.play()).called(1);
-    });
+        verify(() => mockAudioPlayer.setFilePath(audioFile.path)).called(1);
+      },
+    );
 
     test('pause calls pause on the underlying player', () async {
       when(() => mockAudioPlayer.pause()).thenAnswer((_) async => {});
@@ -91,17 +95,13 @@ void main() {
       expect(stream, isA<Stream<Duration>>());
     });
 
-    test('play rethrows error when setFilePath fails', () async {
-      when(
-        () => mockAudioPlayer.setFilePath(any()),
-      ).thenThrow(Exception('Failed to set file path'));
+    test('play rethrows error when it fails', () async {
+      when(() => mockAudioPlayer.play()).thenThrow(Exception('Failed'));
 
       expect(
         () => audioPlayerService.play(audioFile),
         throwsA(isA<Exception>()),
       );
-
-      verify(() => mockAudioPlayer.setFilePath(audioFile.path)).called(1);
     });
 
     test('dispose calls dispose on the underlying player', () {
@@ -113,5 +113,39 @@ void main() {
 
       verify(() => mockAudioPlayer.dispose()).called(1);
     });
+
+    // Parameterized test cases to cover both branches of the boolean expression
+    final testCases = [
+      {
+        'hasSource': true,
+        'expected': true,
+        'description': 'returns true when audioSource is not null',
+      },
+      {
+        'hasSource': false,
+        'expected': false,
+        'description': 'returns false when audioSource is null',
+      },
+    ];
+
+    for (var params in testCases) {
+      final bool hasSource = params['hasSource'] as bool;
+      final bool expectedResult = params['expected'] as bool;
+      final String description = params['description'] as String;
+
+      test(description, () {
+        if (hasSource) {
+          when(() => mockAudioPlayer.audioSource).thenReturn(mockAudioSource);
+        } else {
+          when(() => mockAudioPlayer.audioSource).thenReturn(null);
+        }
+
+        // Act
+        final result = audioPlayerService.hasAudioSource;
+
+        // Assert
+        expect(result, equals(expectedResult));
+      });
+    }
   });
 }

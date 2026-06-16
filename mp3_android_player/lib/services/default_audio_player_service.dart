@@ -11,7 +11,6 @@ class DefaultAudioPlayerService implements AudioPlayerService {
   @override
   Future<void> play(final AudioFile audioFile) async {
     try {
-      await _player.setFilePath(audioFile.path);
       _player.play();
     } catch (e) {
       debugPrint('Error playing audio: $e');
@@ -45,6 +44,14 @@ class DefaultAudioPlayerService implements AudioPlayerService {
   @override
   void stop() async {
     _player.stop();
+  }
+
+  @override
+  bool get hasAudioSource => _player.audioSource != null;
+
+  @override
+  Future<dynamic> initialize(final AudioFile audioFile) async {
+    return _player.setFilePath(audioFile.path);
   }
 
   void dispose() {

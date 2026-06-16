@@ -2,6 +2,7 @@ import 'package:mp3_android_player/models/audio_file.dart';
 
 // coverage:ignore-file
 abstract class AudioPlayerService {
+  Future<dynamic> initialize(AudioFile audioFile) async => throw UnimplementedError();
   Future<void> play(AudioFile audioFile) async => throw UnimplementedError();
   void pause() => throw UnimplementedError();
   void resume() => throw UnimplementedError();
@@ -9,4 +10,5 @@ abstract class AudioPlayerService {
   Stream<Duration> get positionStream;
   Stream<Duration> get durationStream;
   void stop() => throw UnimplementedError();
+  bool get hasAudioSource => throw UnimplementedError();
 }

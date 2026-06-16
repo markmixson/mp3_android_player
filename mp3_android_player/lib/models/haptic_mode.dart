@@ -1,0 +1,1 @@
+enum HapticMode { enabled, disabled }
