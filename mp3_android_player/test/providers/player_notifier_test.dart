@@ -53,9 +53,15 @@ void main() {
     ).thenAnswer((_) => Stream.value(Duration.zero));
     when(
       () => mockPreferenceService.getHapticMode(),
-    ).thenAnswer((_) async => HapticMode.disabled);
+    ).thenReturn(HapticMode.disabled);
     when(
       () => mockPreferenceService.setHapticMode(any()),
+    ).thenAnswer((_) async => {});
+    when(
+      () => mockDefaultAudioPlayerService.initialize(any()),
+    ).thenAnswer((_) async => {});
+    when(
+      () => mockHapticAudioPlayerService.initialize(any()),
     ).thenAnswer((_) async => {});
 
     container = ProviderContainer(
@@ -69,7 +75,9 @@ void main() {
         hapticAudioPlayerServiceProvider.overrideWithValue(
           mockHapticAudioPlayerService,
         ),
-        preferenceServiceProvider.overrideWithValue(mockPreferenceService),
+        preferenceServiceProvider.overrideWith(
+          (ref) async => mockPreferenceService,
+        ),
       ],
     );
   });
@@ -98,7 +106,6 @@ void main() {
       when(
         () => mockDefaultAudioPlayerService.play(any()),
       ).thenAnswer((_) async => {});
-
       final notifier = container.read(playerNotifierProvider.notifier);
 
       await notifier.pickAndPlayFile();

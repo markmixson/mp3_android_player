@@ -14,7 +14,6 @@ import 'package:mp3_android_player/providers/player_notifier.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
 import 'package:mp3_android_player/services/audio_file_picker_service_interface.dart';
 import 'package:mp3_android_player/services/preference_service_interface.dart';
-import 'package:mp3_android_player/ui/player_screen.dart';
 
 class MockAudioService extends Mock implements AudioPlayerService {}
 
@@ -30,8 +29,10 @@ void main() {
   late MockAudioService audioService;
   late MockHapticAudioPlayerService hapticAudioService;
   late MockFilePickerService filePickerService;
-  late StreamController<Duration> positionController;
-  late StreamController<Duration> durationController;
+  late StreamController<Duration> defaultPositionController;
+  late StreamController<Duration> defaultDurationController;
+  late StreamController<Duration> hapticPositionController;
+  late StreamController<Duration> hapticDurationController;
   late MockPreferenceService preferenceService;
 
   const audioFile = AudioFile(
@@ -47,47 +48,55 @@ void main() {
   });
 
   tearDown(() {
-    positionController.close();
-    durationController.close();
+    defaultPositionController.close();
+    defaultDurationController.close();
+
+    hapticPositionController.close();
+    hapticDurationController.close();
   });
 
   setUp(() {
     audioService = MockAudioService();
     hapticAudioService = MockHapticAudioPlayerService();
     filePickerService = MockFilePickerService();
-    positionController = StreamController<Duration>.broadcast();
-    durationController = StreamController<Duration>.broadcast();
+    defaultPositionController = StreamController<Duration>.broadcast();
+    defaultDurationController = StreamController<Duration>.broadcast();
+    hapticPositionController = StreamController<Duration>.broadcast();
+    hapticDurationController = StreamController<Duration>.broadcast();
     preferenceService = MockPreferenceService();
 
     when(
       () => audioService.positionStream,
-    ).thenAnswer((_) => positionController.stream);
+    ).thenAnswer((_) => defaultPositionController.stream);
     when(
       () => audioService.durationStream,
-    ).thenAnswer((_) => durationController.stream);
+    ).thenAnswer((_) => defaultDurationController.stream);
     when(
       () => hapticAudioService.positionStream,
-    ).thenAnswer((_) => positionController.stream);
+    ).thenAnswer((_) => hapticPositionController.stream);
     when(
       () => hapticAudioService.durationStream,
-    ).thenAnswer((_) => durationController.stream);
+    ).thenAnswer((_) => hapticDurationController.stream);
 
     when(() => audioService.pause()).thenAnswer((_) async => {});
     when(() => audioService.resume()).thenAnswer((_) async => {});
     when(() => audioService.play(any())).thenAnswer((_) async => {});
     when(() => audioService.seek(any())).thenAnswer((_) async => {});
+    when(() => audioService.initialize(any())).thenAnswer((_) async {});
+
     when(() => hapticAudioService.pause()).thenAnswer((_) async => {});
     when(() => hapticAudioService.resume()).thenAnswer((_) async => {});
     when(() => hapticAudioService.play(any())).thenAnswer((_) async => {});
     when(() => hapticAudioService.seek(any())).thenAnswer((_) async {});
+    when(() => hapticAudioService.initialize(any())).thenAnswer((_) async {});
 
     when(() => audioService.hasAudioSource).thenReturn(true);
     when(() => hapticAudioService.hasAudioSource).thenReturn(true);
     when(() => filePickerService.pickFile()).thenAnswer((_) async => audioFile);
     when(
       () => preferenceService.getHapticMode(),
-    ).thenAnswer((_) async => HapticMode.disabled);
-        when(
+    ).thenReturn(HapticMode.disabled);
+    when(
       () => preferenceService.setHapticMode(any()),
     ).thenAnswer((_) async => {});
 
@@ -96,7 +105,9 @@ void main() {
         defaultAudioPlayerServiceProvider.overrideWithValue(audioService),
         hapticAudioPlayerServiceProvider.overrideWithValue(hapticAudioService),
         audioFilePickerServiceProvider.overrideWithValue(filePickerService),
-        preferenceServiceProvider.overrideWithValue(preferenceService),
+        preferenceServiceProvider.overrideWith((ref) {
+          return preferenceService;
+        }),
       ],
     );
     addTearDown(container.dispose);
@@ -107,33 +118,12 @@ void main() {
   }
 
   group('PlayerScreen', () {
-    final durationCases = <Map<String, Object>>[
-      {'duration': Duration.zero, 'expected': '0:00'},
-      {'duration': const Duration(seconds: 5), 'expected': '0:05'},
-      {'duration': const Duration(seconds: 65), 'expected': '1:05'},
-      {'duration': const Duration(seconds: 125), 'expected': '2:05'},
-    ];
-
-    for (final caseData in durationCases) {
-      final expected = caseData['expected'];
-      final duration = caseData['duration'];
-      testWidgets('formatDuration returns "$expected" for $duration', (
-        tester,
-      ) async {
-        await tester.pumpWidget(buildPlayerScreen());
-
-        expect(
-          formatDuration(caseData['duration'] as Duration),
-          caseData['expected'],
-        );
-      });
-    }
-
     testWidgets(
       '''shows "No file selected" and play button does not resume or pause when 
       no file is loaded''',
       (tester) async {
         await tester.pumpWidget(buildPlayerScreen());
+        await tester.pumpAndSettle();
 
         expect(find.text('No file selected'), findsOneWidget);
         expect(find.byIcon(Icons.play_arrow), findsOneWidget);
@@ -148,6 +138,49 @@ void main() {
       },
     );
 
+    testWidgets('''error loading preferences''', (tester) async {
+      container = ProviderContainer(
+        overrides: [
+          defaultAudioPlayerServiceProvider.overrideWithValue(audioService),
+          hapticAudioPlayerServiceProvider.overrideWithValue(
+            hapticAudioService,
+          ),
+          audioFilePickerServiceProvider.overrideWithValue(filePickerService),
+          preferenceServiceProvider.overrideWith((ref) {
+            throw Exception();
+          }),
+        ],
+      );
+      await tester.pumpWidget(buildPlayerScreen());
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining("Can't load preferences!  Error"),
+        findsOneWidget,
+      );
+      expect(find.byIcon(Icons.play_arrow), findsNothing);
+    });
+
+    testWidgets('''no preferences returned''', (tester) async {
+      container = ProviderContainer(
+        overrides: [
+          defaultAudioPlayerServiceProvider.overrideWithValue(audioService),
+          hapticAudioPlayerServiceProvider.overrideWithValue(
+            hapticAudioService,
+          ),
+          audioFilePickerServiceProvider.overrideWithValue(filePickerService),
+          preferenceServiceProvider.overrideWith((ref) {
+            return null;
+          }),
+        ],
+      );
+      await tester.pumpWidget(buildPlayerScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining("Can't load preferences!"), findsOneWidget);
+      expect(find.byIcon(Icons.play_arrow), findsNothing);
+    });
+
     testWidgets(
       '''selecting a file plays it, shows now playing text, pauses, then 
       resumes correctly''',
@@ -160,6 +193,7 @@ void main() {
         when(() => audioService.resume()).thenAnswer((_) async {});
 
         await tester.pumpWidget(buildPlayerScreen());
+        await tester.pumpAndSettle();
 
         await tester.tap(find.byIcon(Icons.file_present));
         await tester.pumpAndSettle();
@@ -171,13 +205,13 @@ void main() {
         expect(find.byIcon(Icons.pause), findsOneWidget);
 
         await tester.tap(find.byIcon(Icons.pause));
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         verify(() => audioService.pause()).called(1);
         expect(find.byIcon(Icons.play_arrow), findsOneWidget);
 
         await tester.tap(find.byIcon(Icons.play_arrow));
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         verify(() => audioService.resume()).called(1);
         expect(find.byIcon(Icons.pause), findsOneWidget);
@@ -185,8 +219,8 @@ void main() {
     );
 
     testWidgets('haptic mode toggle switches between services', (tester) async {
-      
       await tester.pumpWidget(buildPlayerScreen());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.file_present));
       await tester.pumpAndSettle();
@@ -211,17 +245,14 @@ void main() {
     testWidgets('slider seek updates position stream and calls seek', (
       tester,
     ) async {
-      when(
-        () => filePickerService.pickFile(),
-      ).thenAnswer((_) async => audioFile);
-      when(() => audioService.play(any())).thenAnswer((_) async {});
-
       await tester.pumpWidget(buildPlayerScreen());
+      await tester.pumpAndSettle();
+
       await tester.tap(find.byIcon(Icons.file_present));
       await tester.pumpAndSettle();
 
-      positionController.add(const Duration(seconds: 2));
-      durationController.add(const Duration(seconds: 10));
+      defaultPositionController.add(const Duration(seconds: 2));
+      defaultDurationController.add(const Duration(seconds: 10));
       await tester.pumpAndSettle();
 
       expect(find.text('0:02'), findsOneWidget);

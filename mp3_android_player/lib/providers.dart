@@ -64,12 +64,7 @@ final hapticAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
   return player;
 });
 
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError("need to override this in main");
-});
-
-/// Provider for the [PreferenceService].
-final preferenceServiceProvider = Provider<PreferenceService>((ref) {
-  final sharedPreferences = ref.watch(sharedPreferencesProvider);
+final preferenceServiceProvider = FutureProvider<PreferenceService?>((ref) async {
+  final sharedPreferences = await SharedPreferences.getInstance();
   return DefaultPreferenceService(sharedPreferences);
 });

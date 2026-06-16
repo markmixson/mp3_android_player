@@ -8,13 +8,15 @@ class PlayerState {
   final Duration position;
   final Duration duration;
   final HapticMode hapticMode;
+  final bool isLoading;
 
   PlayerState({
     this.currentFile,
     this.status = PlaybackStatus.stopped,
     this.position = Duration.zero,
     this.duration = Duration.zero,
-    this.hapticMode = HapticMode.disabled
+    this.hapticMode = HapticMode.disabled,
+    this.isLoading = false,
   });
 
   PlayerState copyWith({
@@ -22,14 +24,16 @@ class PlayerState {
     PlaybackStatus? status,
     Duration? position,
     Duration? duration,
-    HapticMode? hapticMode
+    HapticMode? hapticMode,
+    bool? isLoading,
   }) {
     return PlayerState(
       currentFile: currentFile ?? this.currentFile,
       status: status ?? this.status,
       position: position ?? this.position,
       duration: duration ?? this.duration,
-      hapticMode: hapticMode ?? this.hapticMode
+      hapticMode: hapticMode ?? this.hapticMode,
+      isLoading: isLoading ?? this.isLoading,
     );
   }
 }

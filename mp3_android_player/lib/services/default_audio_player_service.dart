@@ -50,8 +50,8 @@ class DefaultAudioPlayerService implements AudioPlayerService {
   bool get hasAudioSource => _player.audioSource != null;
 
   @override
-  void initialize(final AudioFile audioFile) async {
-    await _player.setFilePath(audioFile.path);
+  Future<dynamic> initialize(final AudioFile audioFile) async {
+    return _player.setFilePath(audioFile.path);
   }
 
   void dispose() {

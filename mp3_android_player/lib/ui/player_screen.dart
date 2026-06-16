@@ -1,105 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mp3_android_player/models/haptic_mode.dart';
-import 'package:mp3_android_player/models/player_status.dart';
 import 'package:mp3_android_player/providers.dart';
-import 'package:mp3_android_player/providers/player_notifier.dart';
-
-String formatDuration(final Duration duration) {
-  final minutes = duration.inMinutes;
-  final seconds = duration.inSeconds % 60;
-  return '$minutes:${seconds.toString().padLeft(2, '0')}';
-}
+import 'package:mp3_android_player/services/preference_service_interface.dart';
+import 'package:mp3_android_player/ui/player_screen_main.dart';
 
 class PlayerScreen extends ConsumerWidget {
   const PlayerScreen({super.key});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final state = ref.watch(playerNotifierProvider);
-    final notifier = ref.read(playerNotifierProvider.notifier);
-    final defaultAudioPlayerService = ref.read(defaultAudioPlayerServiceProvider);
-    final hapticAudioPlayerService = ref.read(hapticAudioPlayerServiceProvider);
-    final currentAudioPlayerService = state.hapticMode == HapticMode.enabled
-        ? hapticAudioPlayerService
-        : defaultAudioPlayerService;
+    final future = ref.read(preferenceServiceProvider.future);
     return Scaffold(
       appBar: AppBar(title: const Text('MP3 Player')),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (state.currentFile != null) ...[
-              Text(
-                'Now Playing: ${state.currentFile!.name}',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 20),
-              StreamBuilder<Duration>(
-                stream: currentAudioPlayerService.positionStream,
-                builder: (context, snapshot) {
-                  final position = snapshot.data ?? Duration.zero;
-                  return Column(
-                    children: [
-                      StreamBuilder<Duration>(
-                        stream: currentAudioPlayerService.durationStream,
-                        builder: (context, snapshot) {
-                          final duration = snapshot.data ?? Duration.zero;
-                          final double current = position.inSeconds.toDouble();
-                          final double total = duration.inSeconds.toDouble();
-
-                          return Slider(
-                            value: current.clamp(0.0, total),
-                            onChanged: (val) {
-                              currentAudioPlayerService.seek(
-                                Duration(seconds: val.toInt()),
-                              );
-                            },
-                            min: 0.0,
-                            max: total,
-                          );
-                        },
-                      ),
-                      Text(formatDuration(position)),
-                    ],
-                  );
-                },
-              ),
-            ] else
-              const Text('No file selected'),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Switch(
-                  value: state.hapticMode == HapticMode.enabled,
-                  onChanged: (bool value) {
-                    notifier.toggleHapticMode(
-                      value ? HapticMode.enabled : HapticMode.disabled,
-                    );
-                  },
-                ),
-                const Text('Haptic Mode'),
-                const SizedBox(width: 20),
-                IconButton(
-                  icon: const Icon(Icons.file_present),
-                  onPressed: () async => notifier.pickAndPlayFile(),
-                  enableFeedback: false,
-                ),
-                IconButton(
-                  icon: Icon(
-                    state.status == PlaybackStatus.playing
-                        ? Icons.pause
-                        : Icons.play_arrow,
-                  ),
-                  onPressed: state.currentFile != null 
-                      ? () async => notifier.togglePlayPause() 
-                      : null,
-                  enableFeedback: false,
-                ),
-              ],
-            ),
-          ],
+        child: FutureBuilder<PreferenceService?>(
+          future: future,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Text(
+                "Can't load preferences!  Error: ${snapshot.error} Trace: ${snapshot.stackTrace}",
+              );
+            } else if (snapshot.hasData) {
+              return getMainScreen(context, ref, snapshot.data!);
+            } else {
+              return Text("Can't load preferences!");
+            }
+          },
         ),
       ),
     );

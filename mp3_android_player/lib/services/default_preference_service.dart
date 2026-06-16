@@ -14,7 +14,7 @@ class DefaultPreferenceService implements PreferenceService {
   }
 
   @override
-  Future<HapticMode> getHapticMode() async {
+  HapticMode getHapticMode() {
     final modeName = _sharedPreferences.getString(_hapticModeKey);
     if (modeName != null) {
       return HapticMode.values.firstWhere(
