@@ -19,9 +19,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
   }) : _defaultAudioPlayerService = audioPlayerService,
        _audioFilePickerService = audioFilePickerService,
        _hapticAudioPlayerService = hapticAudioPlayerService,
-       super(PlayerState()) {
-    _listenToPosition();
-  }
+       super(PlayerState());
 
   Future<void> toggleHapticMode(
     final HapticMode mode,
@@ -33,7 +31,6 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     final currentPosition = state.position;
     state = state.copyWith(hapticMode: mode);
     await preferenceService.setHapticMode(mode);
-    _listenToPosition();
     await currentAudioPlayerService.seek(currentPosition);
     if (state.status == PlaybackStatus.playing) {
       resumeOrPlay();
@@ -43,10 +40,15 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
   Future<void> pickAndPlayFile(final PreferenceService prefs) async {
     final file = await _audioFilePickerService.pickFile();
     if (file != null) {
-      state = state.copyWith(currentFile: file, isLoading: true, hapticMode: prefs.getHapticMode());
+      state = state.copyWith(
+        currentFile: file,
+        isLoading: true,
+        hapticMode: prefs.getHapticMode(),
+      );
       final myCurrentService = currentAudioPlayerService;
       await _hapticAudioPlayerService.initialize(file);
       await _defaultAudioPlayerService.initialize(file);
+      _listenToPosition();
       await myCurrentService.play(file);
       state = state.copyWith(
         currentFile: file,
@@ -69,6 +71,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
   }
 
   Future<void> resumeOrPlay() async {
+    _listenToPosition();
     if (currentAudioPlayerService.hasAudioSource) {
       currentAudioPlayerService.resume();
     } else {
