@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mp3_android_player/models/audio_file.dart';
 import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:mp3_android_player/models/player_state.dart';
 import 'package:mp3_android_player/models/player_status.dart';
