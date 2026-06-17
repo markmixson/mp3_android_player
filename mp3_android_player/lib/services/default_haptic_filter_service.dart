@@ -19,7 +19,7 @@ class DefaultHapticFilterService implements HapticFilterService {
   ) async {
     final path = audioFile.path;
     final outputPath = await _ffmpegHelper.getPipePath();
-    final options = '-i $path -y -af "lowpass=f=250" -f mpegts $outputPath';
+    final options = '-i $path -y -af "lowpass=f=250" -f wav $outputPath';
     // Apply a low-pass filter at 250Hz
     _ffmpegHelper.executeAsync(outputPath, options);
     return sourceSetter.call(outputPath);
