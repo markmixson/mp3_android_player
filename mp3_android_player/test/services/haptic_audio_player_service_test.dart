@@ -6,7 +6,6 @@ import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/helpers/file_helper.dart';
-import 'package:mp3_android_player/helpers/mime_helper.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
 import 'package:mp3_android_player/services/haptic_filter_service_interface.dart';
 import 'package:mp3_android_player/services/haptic_audio_player_service.dart';
@@ -27,8 +26,6 @@ class MockFile extends Mock implements File {}
 
 class MockAudioSource extends Mock implements AudioSource {}
 
-class MockMimeHelper extends Mock implements MimeHelper {}
-
 Future<void> testParameterized(
   String description,
   Future<void> Function(dynamic) testCase,
@@ -47,7 +44,6 @@ void main() {
     late MockFileHelper mockFileHelper;
     late MockAudioFile mockAudioFile;
     late StreamController<Uint8List> controller;
-    late MockMimeHelper mockMimeHelper;
 
     setUpAll(() {
       // Register fallback for potential complex types if necessary
@@ -62,13 +58,11 @@ void main() {
       mockFileHelper = MockFileHelper();
       mockAudioFile = MockAudioFile();
       controller = StreamController<Uint8List>.broadcast();
-      mockMimeHelper = MockMimeHelper();
 
       service = HapticAudioPlayerService(
         player: mockPlayer,
         hapticFilterService: mockHapticFilter,
         fileHelper: mockFileHelper,
-        mimeHelper: mockMimeHelper
       );
     });
 
@@ -94,8 +88,9 @@ void main() {
             () => mockPlayer.setAudioSource(any()),
           ).thenAnswer((_) async => null);
           when(() => mockPlayer.play()).thenAnswer((_) async => {});
-          when(() => mockHapticFilter.outputDataStreamController).thenReturn(controller);
-          when(() => mockMimeHelper.getMimeType(any(), any())).thenReturn('mytype');
+          when(
+            () => mockHapticFilter.outputDataStreamController,
+          ).thenReturn(controller);
 
           service.initialize(mockAudioFile);
 
