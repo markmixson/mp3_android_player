@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
-import 'package:ffmpeg_kit_audio_flutter/log.dart';
 import 'package:ffmpeg_kit_audio_flutter/return_code.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
