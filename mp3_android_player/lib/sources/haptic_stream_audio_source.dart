@@ -2,14 +2,13 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
 class HapticStreamAudioSource extends StreamAudioSource {
   final File _file;
   final String _contentType;
-  final StreamController<Uint8List> _controller;
+  final StreamController<List<int>> _controller;
 
   HapticStreamAudioSource(this._file, this._contentType, this._controller);
 
@@ -36,7 +35,7 @@ class HapticStreamAudioSource extends StreamAudioSource {
         .openRead(start, end)
         .listen(
           (List<int> chunk) {
-            _controller.add(Uint8List.fromList(chunk));
+            _controller.add(chunk);
           },
           onError: (error) {
             debugPrint('Error reading pipe: $error');

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:mp3_android_player/helpers/ffmpeg_helper.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
@@ -26,6 +25,6 @@ class DefaultHapticFilterService implements HapticFilterService {
   }
 
   @override
-  StreamController<Uint8List> get outputDataStreamController =>
+  StreamController<List<int>> get outputDataStreamController =>
       _ffmpegHelper.outputDataStreamController;
 }

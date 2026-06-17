@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
@@ -11,11 +10,11 @@ void main() {
   group('HapticStreamAudioSource', () {
     late MockFile mockFile;
     const String testContentType = 'audio/mpeg';
-    late StreamController<Uint8List> dataStreamController;
+    late StreamController<List<int>> dataStreamController;
 
     setUp(() {
       mockFile = MockFile();
-      dataStreamController = StreamController<Uint8List>.broadcast();
+      dataStreamController = StreamController<List<int>>.broadcast();
     });
 
     tearDown(() {
@@ -94,7 +93,7 @@ void main() {
           expect(response.contentLength, equals(expectedContentLength));
           expect(response.offset, equals(expectedOffset));
           expect(response.contentType, equals(testContentType));
-          expect(response.stream, isA<Stream<Uint8List>>());
+          expect(response.stream, isA<Stream<List<int>>>());
           response.stream.listen(
             (data) {
               if (streamError) {

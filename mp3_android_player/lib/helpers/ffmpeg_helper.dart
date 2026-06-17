@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_audio_flutter/return_code.dart';
@@ -7,18 +6,18 @@ import 'package:mp3_android_player/helpers/ffmpeg_wrapper.dart';
 
 class FFmpegHelper {
   final FFmpegWrapper _wrapper;
-  final StreamController<Uint8List> _dataStreamController;
+  final StreamController<List<int>> _dataStreamController;
   final Completer<String> _completer;
 
   FFmpegHelper({
     required FFmpegWrapper wrapper,
-    required StreamController<Uint8List> controller,
+    required StreamController<List<int>> controller,
     required Completer<String> completer,
   }) : _wrapper = wrapper,
        _dataStreamController = controller,
        _completer = completer;
 
-  StreamController<Uint8List> get outputDataStreamController =>
+  StreamController<List<int>> get outputDataStreamController =>
       _dataStreamController;
 
   Future<String> getPipePath() async {

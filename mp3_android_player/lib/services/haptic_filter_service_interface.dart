@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:mp3_android_player/models/audio_file.dart';
 
@@ -11,6 +10,6 @@ abstract class HapticFilterService {
     AudioFile audioFile,
     Function(String) sourceSetter,
   ) async => throw UnimplementedError();
-  StreamController<Uint8List> get outputDataStreamController =>
+  StreamController<List<int>> get outputDataStreamController =>
       throw UnimplementedError();
 }
