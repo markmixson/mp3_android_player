@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/helpers/file_helper.dart';
@@ -25,10 +28,16 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
     return _hapticFilterService.applyHapticFilter(audioFile, ((
       processedPath,
     ) async {
-      final file = _fileHelper.getFile(processedPath);
-      final source = HapticStreamAudioSource(file, defaultType, _hapticFilterService.outputDataStreamController);
+      final file = await _fileHelper.getFileWhenPresent(processedPath);
+      final source = HapticStreamAudioSource(
+        file,
+        defaultType,
+        _hapticFilterService.outputDataStreamController,
+      );
       await _player.setAudioSource(source);
-      debugPrint("player source initialized for $processedPath, $file of type $defaultType");
+      debugPrint(
+        "player source initialized for $processedPath, $file of type $defaultType",
+      );
       return processedPath;
     }));
   }

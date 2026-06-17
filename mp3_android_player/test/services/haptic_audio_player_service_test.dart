@@ -44,6 +44,7 @@ void main() {
     late MockFileHelper mockFileHelper;
     late MockAudioFile mockAudioFile;
     late StreamController<Uint8List> controller;
+    late MockFile mockFile;
 
     setUpAll(() {
       // Register fallback for potential complex types if necessary
@@ -58,6 +59,7 @@ void main() {
       mockFileHelper = MockFileHelper();
       mockAudioFile = MockAudioFile();
       controller = StreamController<Uint8List>.broadcast();
+      mockFile = MockFile();
 
       service = HapticAudioPlayerService(
         player: mockPlayer,
@@ -83,7 +85,9 @@ void main() {
           when(
             () => mockHapticFilter.applyHapticFilter(any(), any()),
           ).thenAnswer((_) async => processedPath);
-          when(() => mockFileHelper.getFile(any())).thenReturn(MockFile());
+          when(
+            () => mockFileHelper.getFileWhenPresent(any()),
+          ).thenAnswer((_) async => mockFile);
           when(
             () => mockPlayer.setAudioSource(any()),
           ).thenAnswer((_) async => null);
@@ -91,10 +95,11 @@ void main() {
           when(
             () => mockHapticFilter.outputDataStreamController,
           ).thenReturn(controller);
+          when(() => mockFile.exists()).thenAnswer((_) async => true);
 
-          service.initialize(mockAudioFile);
+          await service.initialize(mockAudioFile);
 
-          service.play(mockAudioFile);
+          await service.play(mockAudioFile);
 
           final Function(String) captured =
               verify(
@@ -104,10 +109,10 @@ void main() {
                     ),
                   ).captured.last
                   as Function(String);
-          captured.call(hapticPath);
+          await captured.call(hapticPath);
 
           verify(
-            () => mockFileHelper.getFile(any(that: equals(hapticPath))),
+            () => mockFileHelper.getFileWhenPresent(any(that: equals(hapticPath))),
           ).called(1);
           verify(
             () => mockPlayer.setAudioSource(
