@@ -95,9 +95,6 @@ void main() {
       when(
         () => mockSession.getFailStackTrace(),
       ).thenAnswer((_) async => 'Error details');
-      when(
-        () => mockSession.getAllLogs(),
-      ).thenAnswer((_) async => [Log(0, 0, "blah"), Log(0, 0, "blah"), Log(0, 0, "blah")]);
 
       expect(
         ffmpegHelper.executeAsync(outputPath, command),
@@ -105,7 +102,7 @@ void main() {
           isA<Exception>().having(
             (e) => e.toString(),
             'message',
-            contains('FFmpeg failed to apply low-pass filter: Error details logs: blah,blah,blah'),
+            contains('FFmpeg failed to apply low-pass filter: Error details'),
           ),
         ),
       );

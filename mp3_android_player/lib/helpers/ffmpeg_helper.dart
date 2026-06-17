@@ -47,11 +47,9 @@ class FFmpegHelper {
         _completer.complete(outputPath);
       } else {
         final failStackTrace = await session.getFailStackTrace();
-        final logs = await session.getAllLogs();
-        final joined = logs.map((e) => e.getMessage()).join(',');
         _completer.completeError(
           Exception(
-            'FFmpeg failed to apply low-pass filter: $failStackTrace logs: $joined',
+            'FFmpeg failed to apply low-pass filter: $failStackTrace',
           ),
         );
       }
