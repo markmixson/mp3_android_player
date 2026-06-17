@@ -3,6 +3,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_helper.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_wrapper.dart';
 import 'package:mp3_android_player/helpers/file_helper.dart';
+import 'package:mp3_android_player/helpers/mime_helper.dart';
 import 'package:mp3_android_player/services/audio_file_picker_service_interface.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
 // ignore: implementation_imports
@@ -52,6 +53,7 @@ final hapticAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
     player: AudioPlayer(),
     hapticFilterService: hapticFilterService,
     fileHelper: FileHelper(),
+    mimeHelper: MimeHelper()
   );
   ref.onDispose(() {
     player.dispose();
