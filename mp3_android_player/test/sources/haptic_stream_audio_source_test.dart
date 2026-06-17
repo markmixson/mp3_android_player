@@ -59,9 +59,6 @@ void main() {
         final int? start = params['start'] as int?;
         final int? end = params['end'] as int?;
         final int fileLength = params['fileLength'] as int;
-        final int expectedContentLength =
-            params['expectedContentLength'] as int;
-        final int expectedOffset = params['expectedOffset'] as int;
         final String description = params['description'] as String;
         final bool streamError = params['streamError'] as bool;
 
