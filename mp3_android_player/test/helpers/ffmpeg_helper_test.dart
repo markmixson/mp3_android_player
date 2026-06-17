@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
+import 'package:ffmpeg_kit_audio_flutter/log.dart';
 import 'package:ffmpeg_kit_audio_flutter/return_code.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -21,7 +22,11 @@ void main() {
 
   setUp(() {
     mockWrapper = MockFFmpegWrapper();
-    ffmpegHelper = FFmpegHelper(wrapper: mockWrapper);
+    ffmpegHelper = FFmpegHelper(
+      wrapper: mockWrapper,
+      completer: Completer(),
+      controller: StreamController<Uint8List>.broadcast(),
+    );
     mockSession = MockFFmpegSession();
   });
 
@@ -90,6 +95,9 @@ void main() {
       when(
         () => mockSession.getFailStackTrace(),
       ).thenAnswer((_) async => 'Error details');
+      when(
+        () => mockSession.getAllLogs(),
+      ).thenAnswer((_) async => [Log(0, 0, "blah"), Log(0, 0, "blah"), Log(0, 0, "blah")]);
 
       expect(
         ffmpegHelper.executeAsync(outputPath, command),
@@ -97,7 +105,7 @@ void main() {
           isA<Exception>().having(
             (e) => e.toString(),
             'message',
-            contains('FFmpeg failed to apply low-pass filter: Error details'),
+            contains('FFmpeg failed to apply low-pass filter: Error details logs: blah,blah,blah'),
           ),
         ),
       );

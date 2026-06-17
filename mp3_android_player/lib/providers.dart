@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_helper.dart';
@@ -24,13 +27,18 @@ final audioFilePickerServiceProvider = Provider<AudioFilePickerService>((ref) {
 
 /// Provider for the [HapticFilterService]
 final hapticFilterServiceProvider = Provider<HapticFilterService>((ref) {
-  final ffmpegHelper = FFmpegHelper(wrapper: FFmpegWrapper());
+  final controller = StreamController<Uint8List>.broadcast();
+  final ffmpegHelper = FFmpegHelper(
+    wrapper: FFmpegWrapper(),
+    completer: Completer(),
+    controller: controller,
+  );
   final hapticFilterService = DefaultHapticFilterService(
     ffmpegHelper: ffmpegHelper,
   );
   ref.onDispose(() {
-    if (!ffmpegHelper.outputDataStreamController.isClosed) {
-      ffmpegHelper.outputDataStreamController.close();
+    if (!controller.isClosed) {
+      controller.close();
     }
   });
   return hapticFilterService;

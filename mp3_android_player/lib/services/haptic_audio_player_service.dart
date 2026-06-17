@@ -10,7 +10,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   final AudioPlayer _player;
   final HapticFilterService _hapticFilterService;
   final FileHelper _fileHelper;
-  static const String defaultType = 'application/octet-stream';
+  static const String defaultType = 'video/mp2t';
 
   HapticAudioPlayerService({
     required super.player,

@@ -6,12 +6,17 @@ import 'package:ffmpeg_kit_audio_flutter/return_code.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_wrapper.dart';
 
 class FFmpegHelper {
-  final Completer<String> _completer = Completer();
-  final StreamController<Uint8List> _dataStreamController =
-      StreamController<Uint8List>.broadcast();
   final FFmpegWrapper _wrapper;
+  final StreamController<Uint8List> _dataStreamController;
+  final Completer<String> _completer;
 
-  FFmpegHelper({required FFmpegWrapper wrapper}) : _wrapper = wrapper;
+  FFmpegHelper({
+    required FFmpegWrapper wrapper,
+    required StreamController<Uint8List> controller,
+    required Completer<String> completer,
+  }) : _wrapper = wrapper,
+       _dataStreamController = controller,
+       _completer = completer;
 
   StreamController<Uint8List> get outputDataStreamController =>
       _dataStreamController;
@@ -42,8 +47,12 @@ class FFmpegHelper {
         _completer.complete(outputPath);
       } else {
         final failStackTrace = await session.getFailStackTrace();
+        final logs = await session.getAllLogs();
+        final joined = logs.map((e) => e.getMessage()).join(',');
         _completer.completeError(
-          Exception('FFmpeg failed to apply low-pass filter: $failStackTrace'),
+          Exception(
+            'FFmpeg failed to apply low-pass filter: $failStackTrace logs: $joined',
+          ),
         );
       }
       await _dataStreamController.close();
