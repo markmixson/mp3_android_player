@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 class FileHelper {
-  Future<File> getFileWhenPresent(final String processedPath) async {
+  Future<File> getFileWhenUpdated(final String processedPath) async {
     final file = File(processedPath);
     if (await file.exists()) {
       return file;
@@ -11,7 +11,7 @@ class FileHelper {
     final completer = Completer<File>();
     late StreamSubscription<FileSystemEvent> subscription;
     subscription = directory.watch().listen((event) {
-      if (event is FileSystemCreateEvent && event.path == file.path) {
+      if (event is FileSystemModifyEvent && event.path == file.path) {
         subscription.cancel();
         completer.complete(file);
       }

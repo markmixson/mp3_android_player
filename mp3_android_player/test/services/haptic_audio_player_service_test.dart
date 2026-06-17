@@ -86,7 +86,7 @@ void main() {
             () => mockHapticFilter.applyHapticFilter(any(), any()),
           ).thenAnswer((_) async => processedPath);
           when(
-            () => mockFileHelper.getFileWhenPresent(any()),
+            () => mockFileHelper.getFileWhenUpdated(any()),
           ).thenAnswer((_) async => mockFile);
           when(
             () => mockPlayer.setAudioSource(any()),
@@ -112,7 +112,7 @@ void main() {
           await captured.call(hapticPath);
 
           verify(
-            () => mockFileHelper.getFileWhenPresent(any(that: equals(hapticPath))),
+            () => mockFileHelper.getFileWhenUpdated(any(that: equals(hapticPath))),
           ).called(1);
           verify(
             () => mockPlayer.setAudioSource(

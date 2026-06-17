@@ -21,7 +21,7 @@ void main() {
       final file = File('${tempDir.path}/exists.txt');
       await file.create();
 
-      final result = await fileHelper.getFileWhenPresent(file.path);
+      final result = await fileHelper.getFileWhenUpdated(file.path);
 
       expect(result.toString(), equals(file.toString()));
       expect(await result.exists(), isTrue);
@@ -32,7 +32,7 @@ void main() {
       await file.create();
       final targetPath = file.path;
 
-      final future = fileHelper.getFileWhenPresent(targetPath);
+      final future = fileHelper.getFileWhenUpdated(targetPath);
       await file.create();
 
       final result = await future;
@@ -44,7 +44,7 @@ void main() {
       final targetPath = '${tempDir.path}/target.txt';
       final otherFile = File('${tempDir.path}/other.txt');
 
-      final future = fileHelper.getFileWhenPresent(targetPath);
+      final future = fileHelper.getFileWhenUpdated(targetPath);
 
       await otherFile.create();
 
@@ -55,21 +55,19 @@ void main() {
       );
     });
 
-    test(
-      'file is created after a delay',
-      () async {
-        final path = '${tempDir.path}/mod_test_1.txt';
-        final file = File(path);
-        
-        final future = FileHelper().getFileWhenPresent(path);
+    test('file is updated after a delay', () async {
+      final path = '${tempDir.path}/mod_test_1.txt';
+      final file = File(path);
 
-        await Future.delayed(
-          Duration(milliseconds: 500),
-        ).then((onValue) async => file.create());
+      final future = FileHelper().getFileWhenUpdated(path);
 
-        final result1 = await future;
-        expect(result1.toString(), file.toString());
-      },
-    );
+      await Future.delayed(Duration(milliseconds: 500)).then((onValue) async {
+        await file.create();
+        await file.writeAsString("hello");
+      });
+
+      final result1 = await future;
+      expect(result1.toString(), file.toString());
+    });
   });
 }
