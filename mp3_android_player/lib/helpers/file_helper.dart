@@ -13,7 +13,9 @@ class FileHelper {
     subscription = directory.watch().listen((event) {
       if (event is FileSystemModifyEvent && event.path == file.path) {
         subscription.cancel();
-        completer.complete(file);
+        Future.delayed(
+          Duration(milliseconds: 200),
+        ).then((onValue) async => completer.complete(file));
       }
     });
     return completer.future;
