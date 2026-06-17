@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
@@ -12,6 +14,6 @@ class FFmpegWrapper {
     final String command,
     final Function(FFmpegSession)? callback
   ) async {    
-    return FFmpegKit.executeAsync(command, callback);
+    return Isolate.run(() => FFmpegKit.executeAsync(command, callback));
   }
 }
