@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_helper.dart';
@@ -25,18 +22,6 @@ void main() {
       mockAudioFile = MockAudioFile();
 
       service = DefaultHapticFilterService(ffmpegHelper: mockHelper);
-    });
-
-    group('outputDataStreamController', () {
-      test('get controller', () async {
-        final controller = StreamController<Uint8List>.broadcast();
-        when(
-          () => mockHelper.outputDataStreamController,
-        ).thenReturn(controller);
-        final result = service.outputDataStreamController;
-        expect(result, isA<StreamController<Uint8List>>());
-        controller.close();
-      });
     });
 
     group('applyHapticFilter', () {

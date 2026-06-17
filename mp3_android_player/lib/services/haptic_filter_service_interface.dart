@@ -10,6 +10,4 @@ abstract class HapticFilterService {
     AudioFile audioFile,
     Function(String) sourceSetter,
   ) async => throw UnimplementedError();
-  StreamController<List<int>> get outputDataStreamController =>
-      throw UnimplementedError();
 }

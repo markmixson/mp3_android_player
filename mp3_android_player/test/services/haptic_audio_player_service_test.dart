@@ -1,6 +1,4 @@
-import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -43,7 +41,6 @@ void main() {
     late MockHapticFilterService mockHapticFilter;
     late MockFileHelper mockFileHelper;
     late MockAudioFile mockAudioFile;
-    late StreamController<Uint8List> controller;
     late MockFile mockFile;
 
     setUpAll(() {
@@ -58,7 +55,6 @@ void main() {
       mockHapticFilter = MockHapticFilterService();
       mockFileHelper = MockFileHelper();
       mockAudioFile = MockAudioFile();
-      controller = StreamController<Uint8List>.broadcast();
       mockFile = MockFile();
 
       service = HapticAudioPlayerService(
@@ -66,10 +62,6 @@ void main() {
         hapticFilterService: mockHapticFilter,
         fileHelper: mockFileHelper,
       );
-    });
-
-    tearDown(() {
-      controller.close();
     });
 
     group('play', () {
@@ -86,16 +78,12 @@ void main() {
             () => mockHapticFilter.applyHapticFilter(any(), any()),
           ).thenAnswer((_) async => processedPath);
           when(
-            () => mockFileHelper.getFileWhenUpdated(any()),
-          ).thenAnswer((_) async => mockFile);
+            () => mockFileHelper.getFile(any()),
+          ).thenReturn(mockFile);
           when(
             () => mockPlayer.setAudioSource(any()),
           ).thenAnswer((_) async => null);
           when(() => mockPlayer.play()).thenAnswer((_) async => {});
-          when(
-            () => mockHapticFilter.outputDataStreamController,
-          ).thenReturn(controller);
-          when(() => mockFile.exists()).thenAnswer((_) async => true);
 
           await service.initialize(mockAudioFile);
 
@@ -112,7 +100,7 @@ void main() {
           await captured.call(hapticPath);
 
           verify(
-            () => mockFileHelper.getFileWhenUpdated(any(that: equals(hapticPath))),
+            () => mockFileHelper.getFile(any(that: equals(hapticPath))),
           ).called(1);
           verify(
             () => mockPlayer.setAudioSource(

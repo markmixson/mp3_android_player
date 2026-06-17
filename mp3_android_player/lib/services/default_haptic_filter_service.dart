@@ -23,8 +23,4 @@ class DefaultHapticFilterService implements HapticFilterService {
     _ffmpegHelper.executeAsync(outputPath, options);
     return sourceSetter.call(outputPath);
   }
-
-  @override
-  StreamController<List<int>> get outputDataStreamController =>
-      _ffmpegHelper.outputDataStreamController;
 }

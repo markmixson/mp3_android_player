@@ -27,12 +27,8 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
     return _hapticFilterService.applyHapticFilter(audioFile, ((
       processedPath,
     ) async {
-      final file = await _fileHelper.getFileWhenUpdated(processedPath);
-      final source = HapticStreamAudioSource(
-        file,
-        defaultType,
-        _hapticFilterService.outputDataStreamController,
-      );
+      final file = _fileHelper.getFile(processedPath);
+      final source = HapticStreamAudioSource(file, defaultType);
       await _player.setAudioSource(source);
       debugPrint(
         "player source initialized for $processedPath, $file of type $defaultType",

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_audio_flutter/return_code.dart';
@@ -24,20 +23,8 @@ void main() {
     ffmpegHelper = FFmpegHelper(
       wrapper: mockWrapper,
       completer: Completer(),
-      controller: StreamController<Uint8List>.broadcast(),
     );
     mockSession = MockFFmpegSession();
-  });
-
-  tearDown(() {
-    ffmpegHelper.outputDataStreamController.close();
-  });
-
-  group('FFmpegHelper.outputDataStreamController', () {
-    test('get controller', () async {
-      final controller = ffmpegHelper.outputDataStreamController;
-      expect(controller, isA<StreamController<Uint8List>>());
-    });
   });
 
   group('FFmpegHelper.getPipePath', () {

@@ -6,19 +6,13 @@ import 'package:mp3_android_player/helpers/ffmpeg_wrapper.dart';
 
 class FFmpegHelper {
   final FFmpegWrapper _wrapper;
-  final StreamController<List<int>> _dataStreamController;
   final Completer<String> _completer;
 
   FFmpegHelper({
     required FFmpegWrapper wrapper,
-    required StreamController<List<int>> controller,
     required Completer<String> completer,
   }) : _wrapper = wrapper,
-       _dataStreamController = controller,
        _completer = completer;
-
-  StreamController<List<int>> get outputDataStreamController =>
-      _dataStreamController;
 
   Future<String> getPipePath() async {
     final pipePath = await _wrapper.getPipe();
@@ -52,7 +46,6 @@ class FFmpegHelper {
           ),
         );
       }
-      await _dataStreamController.close();
     });
   }
 }

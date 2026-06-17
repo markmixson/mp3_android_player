@@ -10,15 +10,9 @@ void main() {
   group('HapticStreamAudioSource', () {
     late MockFile mockFile;
     const String testContentType = 'audio/mpeg';
-    late StreamController<List<int>> dataStreamController;
 
     setUp(() {
       mockFile = MockFile();
-      dataStreamController = StreamController<List<int>>.broadcast();
-    });
-
-    tearDown(() {
-      dataStreamController.close();
     });
 
     group('request', () {
@@ -84,14 +78,13 @@ void main() {
           final source = HapticStreamAudioSource(
             mockFile,
             testContentType,
-            dataStreamController,
           );
 
           final response = await source.request(start, end);
 
-          expect(response.sourceLength, equals(fileLength.toDouble()));
-          expect(response.contentLength, equals(expectedContentLength));
-          expect(response.offset, equals(expectedOffset));
+          expect(response.sourceLength, isNull);
+          expect(response.contentLength, isNull);
+          expect(response.offset, equals(0));
           expect(response.contentType, equals(testContentType));
           expect(response.stream, isA<Stream<List<int>>>());
           response.stream.listen(
