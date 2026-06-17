@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_audio_flutter/return_code.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,36 +25,54 @@ void main() {
     mockSession = MockFFmpegSession();
   });
 
+  tearDown(() {
+    ffmpegHelper.outputDataStreamController.close();
+  });
+
+  group('FFmpegHelper.outputDataStreamController', () {
+    test('get controller', () async {
+      final controller = ffmpegHelper.outputDataStreamController;
+      expect(controller, isA<StreamController<Uint8List>>());
+    });
+  });
+
+  group('FFmpegHelper.getPipePath', () {
+    const String fileName = "test.mp3";
+    test('get file', () async {
+      when(() => mockWrapper.getPipe()).thenAnswer((_) async => fileName);
+      final result = await ffmpegHelper.getPipePath();
+      expect(result, fileName);
+    });
+    test('get null file', () async {
+      when(() => mockWrapper.getPipe()).thenAnswer((_) async => null);
+      expect(ffmpegHelper.getPipePath(), throwsA(isA<StateError>()));
+    });
+  });
+
   group('FFmpegHelper.executeAsync', () {
-    final List<String> tempFilesPath = [];
-    tempFilesPath.add('temp1.mp3');
     const outputPath = 'output.mp3';
     const command = '-i input.mp3 output.mp3';
 
-    test(
-      'should add outputPath to tempFiles when FFmpeg returns success',
-      () async {
-        // Arrange
-        when(() => mockWrapper.executeAsync(any(), any())).thenAnswer((
-          invocation,
-        ) async {
-          // Extract the callback passed to executeAsync
-          final callback =
-              invocation.positionalArguments[1] as Function(FFmpegSession);
-          // Simulate the callback being executed with a successful session
-          await callback(mockSession);
-          return mockSession;
-        });
-        when(
-          () => mockSession.getReturnCode(),
-        ).thenAnswer((_) async => ReturnCode(0));
+    test('check for success', () async {
+      // Arrange
+      when(() => mockWrapper.executeAsync(any(), any())).thenAnswer((
+        invocation,
+      ) async {
+        // Extract the callback passed to executeAsync
+        final callback =
+            invocation.positionalArguments[1] as Function(FFmpegSession);
+        // Simulate the callback being executed with a successful session
+        await callback(mockSession);
+        return mockSession;
+      });
+      when(
+        () => mockSession.getReturnCode(),
+      ).thenAnswer((_) async => ReturnCode(0));
 
-        await ffmpegHelper.executeAsync(tempFilesPath, outputPath, command);
+      await ffmpegHelper.executeAsync(outputPath, command);
 
-        expect(tempFilesPath, contains(outputPath));
-        verify(() => mockSession.getReturnCode()).called(1);
-      },
-    );
+      verify(() => mockSession.getReturnCode()).called(1);
+    });
 
     test('should throw exception when FFmpeg fails', () async {
       // Arrange
@@ -71,7 +92,7 @@ void main() {
       ).thenAnswer((_) async => 'Error details');
 
       expect(
-        ffmpegHelper.executeAsync(tempFilesPath, outputPath, command),
+        ffmpegHelper.executeAsync(outputPath, command),
         throwsA(
           isA<Exception>().having(
             (e) => e.toString(),

@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/helpers/file_helper.dart';
-import 'package:mp3_android_player/helpers/mime_helper.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
 import 'package:mp3_android_player/services/haptic_filter_service_interface.dart';
 import 'package:mp3_android_player/services/haptic_audio_player_service.dart';
@@ -14,8 +15,6 @@ import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
 class MockAudioPlayer extends Mock implements AudioPlayer {}
 
 class MockHapticFilterService extends Mock implements HapticFilterService {}
-
-class MockMimeHelper extends Mock implements MimeHelper {}
 
 class MockFileHelper extends Mock implements FileHelper {}
 
@@ -42,9 +41,9 @@ void main() {
     late HapticAudioPlayerService service;
     late MockAudioPlayer mockPlayer;
     late MockHapticFilterService mockHapticFilter;
-    late MockMimeHelper mockMime;
     late MockFileHelper mockFileHelper;
     late MockAudioFile mockAudioFile;
+    late StreamController<Uint8List> controller;
 
     setUpAll(() {
       // Register fallback for potential complex types if necessary
@@ -56,16 +55,19 @@ void main() {
     setUp(() {
       mockPlayer = MockAudioPlayer();
       mockHapticFilter = MockHapticFilterService();
-      mockMime = MockMimeHelper();
       mockFileHelper = MockFileHelper();
       mockAudioFile = MockAudioFile();
+      controller = StreamController<Uint8List>.broadcast();
 
       service = HapticAudioPlayerService(
         player: mockPlayer,
         hapticFilterService: mockHapticFilter,
-        mimeHelper: mockMime,
         fileHelper: mockFileHelper,
       );
+    });
+
+    tearDown(() {
+      controller.close();
     });
 
     group('play', () {
@@ -83,12 +85,10 @@ void main() {
           ).thenAnswer((_) async => processedPath);
           when(() => mockFileHelper.getFile(any())).thenReturn(MockFile());
           when(
-            () => mockMime.getMimeType(any(), any()),
-          ).thenReturn('audio/mpeg');
-          when(
             () => mockPlayer.setAudioSource(any()),
           ).thenAnswer((_) async => null);
           when(() => mockPlayer.play()).thenAnswer((_) async => {});
+          when(() => mockHapticFilter.outputDataStreamController).thenReturn(controller);
 
           service.initialize(mockAudioFile);
 
@@ -106,12 +106,6 @@ void main() {
 
           verify(
             () => mockFileHelper.getFile(any(that: equals(hapticPath))),
-          ).called(1);
-          verify(
-            () => mockMime.getMimeType(
-              any(that: equals(hapticPath)),
-              any(that: equals(HapticAudioPlayerService.defaultType)),
-            ),
           ).called(1);
           verify(
             () => mockPlayer.setAudioSource(
