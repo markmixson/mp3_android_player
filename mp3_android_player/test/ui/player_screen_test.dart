@@ -264,6 +264,45 @@ void main() {
 
       verify(() => audioService.seek(const Duration(seconds: 5))).called(1);
     });
+
+    testWidgets(
+      'slider seek updates position stream and calls play on hapticMode = enabled',
+      (tester) async {
+        when(() => audioService.play(any(), any())).thenAnswer((_) async => {});
+        when(() => audioService.initialize(any())).thenAnswer((_) async => {});
+
+        container.read(playerNotifierProvider.notifier).state = PlayerState(
+          currentFile: audioFile,
+          status: PlaybackStatus.playing,
+          hapticMode: HapticMode.enabled,
+        );
+
+        await tester.pumpWidget(buildPlayerScreen());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.file_present));
+        await tester.pumpAndSettle();
+
+        container.read(playerNotifierProvider.notifier).state = PlayerState(
+          currentFile: audioFile,
+          status: PlaybackStatus.playing,
+          hapticMode: HapticMode.enabled,
+        );
+
+        defaultPositionController.add(const Duration(seconds: 2));
+        defaultDurationController.add(const Duration(seconds: 10));
+        await tester.pumpAndSettle();
+
+        expect(find.text('0:02'), findsOneWidget);
+        expect(find.byType(Slider), findsOneWidget);
+
+        final slider = tester.widget<Slider>(find.byType(Slider));
+        slider.onChanged?.call(5000);
+        await tester.pump();
+
+        verify(() => audioService.play(audioFile, 5000)).called(1);
+      },
+    );
   });
 
   for (final (bool isLoading, AudioFile? currentFile, String expectedText) in [
@@ -276,7 +315,7 @@ void main() {
         container.read(playerNotifierProvider.notifier).state = PlayerState(
           isLoading: isLoading,
           currentFile: currentFile,
-          status: PlaybackStatus.stopped
+          status: PlaybackStatus.stopped,
         );
         await tester.pumpWidget(buildPlayerScreen());
         await tester.pump();

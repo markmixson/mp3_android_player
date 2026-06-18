@@ -28,7 +28,9 @@ Widget getMainScreen(
       ? Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(padding: EdgeInsets.only(bottom: 10.0),),
+            const CircularProgressIndicator(
+              padding: EdgeInsets.only(bottom: 10.0),
+            ),
             Text(
               state.currentFile != null
                   ? "Loading ${state.currentFile!.name}..."
@@ -55,15 +57,22 @@ Widget getMainScreen(
                         stream: currentAudioPlayerService.durationStream,
                         builder: (context, snapshot) {
                           final duration = snapshot.data ?? Duration.zero;
-                          final double current = position.inMilliseconds.toDouble();
-                          final double total = duration.inMilliseconds.toDouble();
+                          final double current = position.inMilliseconds
+                              .toDouble();
+                          final double total = duration.inMilliseconds
+                              .toDouble();
 
                           return Slider(
                             value: current.clamp(0.0, total),
                             onChanged: (val) async {
-                              return currentAudioPlayerService.seek(
-                                Duration(milliseconds: val.toInt()),
-                              );
+                              return state.hapticMode == HapticMode.enabled
+                                  ? currentAudioPlayerService.play(
+                                      state.currentFile!,
+                                      val.toInt(),
+                                    )
+                                  : currentAudioPlayerService.seek(
+                                      Duration(milliseconds: val.toInt()),
+                                    );
                             },
                             min: 0.0,
                             max: total,
