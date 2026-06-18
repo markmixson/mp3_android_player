@@ -49,7 +49,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
       await _hapticAudioPlayerService.initialize(file);
       await _defaultAudioPlayerService.initialize(file);
       _listenToPosition();
-      await myCurrentService.play(file);
+      myCurrentService.play(file);
       state = state.copyWith(
         currentFile: file,
         status: PlaybackStatus.playing,
