@@ -79,13 +79,13 @@ void main() {
     ).thenAnswer((_) => hapticDurationController.stream);
 
     when(() => audioService.pause()).thenAnswer((_) async => {});
-    when(() => audioService.resume()).thenAnswer((_) async => {});
+    when(() => audioService.resume(any())).thenAnswer((_) async => {});
     when(() => audioService.play(any())).thenAnswer((_) async => {});
     when(() => audioService.seek(any())).thenAnswer((_) async => {});
     when(() => audioService.initialize(any())).thenAnswer((_) async {});
 
     when(() => hapticAudioService.pause()).thenAnswer((_) async => {});
-    when(() => hapticAudioService.resume()).thenAnswer((_) async => {});
+    when(() => hapticAudioService.resume(any())).thenAnswer((_) async => {});
     when(() => hapticAudioService.play(any())).thenAnswer((_) async => {});
     when(() => hapticAudioService.seek(any())).thenAnswer((_) async {});
     when(() => hapticAudioService.initialize(any())).thenAnswer((_) async {});
@@ -132,7 +132,7 @@ void main() {
         await tester.pump();
 
         expect(find.byIcon(Icons.pause), findsNothing);
-        verifyNever(() => audioService.resume());
+        verifyNever(() => audioService.resume(any()));
         verifyNever(() => audioService.pause());
         verifyNever(() => audioService.play(any()));
       },
@@ -190,7 +190,7 @@ void main() {
         ).thenAnswer((_) async => audioFile);
         when(() => audioService.play(any())).thenAnswer((_) async {});
         when(() => audioService.hasAudioSource).thenReturn(true);
-        when(() => audioService.resume()).thenAnswer((_) async {});
+        when(() => audioService.resume(any())).thenAnswer((_) async {});
 
         await tester.pumpWidget(buildPlayerScreen());
         await tester.pumpAndSettle();
@@ -213,7 +213,7 @@ void main() {
         await tester.tap(find.byIcon(Icons.play_arrow));
         await tester.pumpAndSettle();
 
-        verify(() => audioService.resume()).called(1);
+        verify(() => audioService.resume(any())).called(1);
         expect(find.byIcon(Icons.pause), findsOneWidget);
       },
     );
@@ -259,7 +259,7 @@ void main() {
       expect(find.byType(Slider), findsOneWidget);
 
       final slider = tester.widget<Slider>(find.byType(Slider));
-      slider.onChanged?.call(5.0);
+      slider.onChanged?.call(5000);
       await tester.pump();
 
       verify(() => audioService.seek(const Duration(seconds: 5))).called(1);

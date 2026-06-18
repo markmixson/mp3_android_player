@@ -55,14 +55,14 @@ Widget getMainScreen(
                         stream: currentAudioPlayerService.durationStream,
                         builder: (context, snapshot) {
                           final duration = snapshot.data ?? Duration.zero;
-                          final double current = position.inSeconds.toDouble();
-                          final double total = duration.inSeconds.toDouble();
+                          final double current = position.inMilliseconds.toDouble();
+                          final double total = duration.inMilliseconds.toDouble();
 
                           return Slider(
                             value: current.clamp(0.0, total),
                             onChanged: (val) async {
                               return currentAudioPlayerService.seek(
-                                Duration(seconds: val.toInt()),
+                                Duration(milliseconds: val.toInt()),
                               );
                             },
                             min: 0.0,

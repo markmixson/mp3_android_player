@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
@@ -9,13 +8,8 @@ class DefaultAudioPlayerService implements AudioPlayerService {
   DefaultAudioPlayerService({required AudioPlayer player}) : _player = player;
 
   @override
-  Future<void> play(final AudioFile audioFile) async {
-    try {
-      _player.play();
-    } catch (e) {
-      debugPrint('Error playing audio: $e');
-      rethrow;
-    }
+  Future<void> play(final AudioFile audioFile, [int position = 0]) async {
+    return _player.play();
   }
 
   @override
@@ -24,8 +18,8 @@ class DefaultAudioPlayerService implements AudioPlayerService {
   }
 
   @override
-  void resume() {
-    _player.play();
+  Future<void> resume(final AudioFile audioFile, [int position = 0]) async {
+    return play(audioFile);
   }
 
   @override

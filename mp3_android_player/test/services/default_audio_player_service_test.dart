@@ -51,7 +51,7 @@ void main() {
     test('resume calls play on the underlying player', () async {
       when(() => mockAudioPlayer.play()).thenAnswer((_) async {});
 
-      audioPlayerService.resume();
+      audioPlayerService.resume(audioFile);
 
       verify(() => mockAudioPlayer.play()).called(1);
     });

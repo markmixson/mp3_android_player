@@ -23,8 +23,31 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
        _fileHelper = fileHelper;
 
   @override
+  Future<void> play(final AudioFile audioFile, [int position = 0]) async {
+    await _applyHapticFilter(audioFile, position);
+    return _player.play();
+  }
+
+  @override
+  Future<void> resume(final AudioFile audioFile, [int position = 0]) async {
+    return play(audioFile, position);
+  }
+
+  @override
+  Future<void> seek(final Duration position) async {
+    // does nothing
+  }
+
+  @override
   Future<dynamic> initialize(final AudioFile audioFile) async {
-    return _hapticFilterService.applyHapticFilter(audioFile, ((
+    // nothing to initialize
+  }
+
+  Future<String> _applyHapticFilter(
+    final AudioFile audioFile,
+    int position,
+  ) async {
+    return _hapticFilterService.applyHapticFilter(audioFile, position, ((
       processedPath,
     ) async {
       final file = _fileHelper.getFile(processedPath);

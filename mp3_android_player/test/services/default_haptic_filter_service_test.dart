@@ -45,7 +45,7 @@ void main() {
           ).thenAnswer((_) async => 'haptic_123.mp3');
 
           final result = await service.applyHapticFilter(
-            mockAudioFile,
+            mockAudioFile, 0,
             (session) async => 'haptic_123$expectedExt',
           );
 

@@ -64,35 +64,44 @@ void main() {
       );
     });
 
+    group('seek', () {
+      test('does nothing', () async {
+        await service.seek(Duration(days: 1));
+      });
+    });
+
     group('play', () {
       testParameterized(
         'should successfully setup and play audio',
         (dynamic params) async {
           final Map<String, dynamic> mapParams = params as Map<String, dynamic>;
           final String inputPath = mapParams['path'];
+          final bool useResume = mapParams['useResume'];
           final String processedPath = 'processed_path.mp3';
           final String hapticPath = 'haptic_1234.mp3';
 
           when(() => mockAudioFile.path).thenReturn(inputPath);
           when(
-            () => mockHapticFilter.applyHapticFilter(any(), any()),
+            () => mockHapticFilter.applyHapticFilter(any(), any(), any()),
           ).thenAnswer((_) async => processedPath);
-          when(
-            () => mockFileHelper.getFile(any()),
-          ).thenReturn(mockFile);
+          when(() => mockFileHelper.getFile(any())).thenReturn(mockFile);
           when(
             () => mockPlayer.setAudioSource(any()),
           ).thenAnswer((_) async => null);
           when(() => mockPlayer.play()).thenAnswer((_) async => {});
 
           await service.initialize(mockAudioFile);
-
-          await service.play(mockAudioFile);
+          if (useResume) {
+            await service.resume(mockAudioFile);
+          } else {
+            await service.play(mockAudioFile);
+          }
 
           final Function(String) captured =
               verify(
                     () => mockHapticFilter.applyHapticFilter(
                       mockAudioFile,
+                      0,
                       captureAny(),
                     ),
                   ).captured.last
@@ -111,24 +120,10 @@ void main() {
           verify(() => mockPlayer.play()).called(1);
         },
         [
-          {'path': 'song.mp3'},
-          {'path': 'music/track.wav'},
+          {'path': 'song.mp3', 'useResume': false},
+          {'path': 'music/track.wav', 'useResume': true},
         ],
       );
-
-      test('should rethrow error when setup fails (branch coverage)', () async {
-        // Arrange
-        when(() => mockAudioFile.path).thenReturn('error.mp3');
-        when(
-          () => mockHapticFilter.applyHapticFilter(any(), any()),
-        ).thenThrow(Exception('Filter Error'));
-
-        expect(
-          () => service.initialize(mockAudioFile),
-          throwsA(isA<Exception>()),
-        );
-        verifyNever(() => mockPlayer.play());
-      });
     });
   });
 }

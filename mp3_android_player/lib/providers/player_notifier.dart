@@ -33,7 +33,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     await preferenceService.setHapticMode(mode);
     await currentAudioPlayerService.seek(currentPosition);
     if (state.status == PlaybackStatus.playing) {
-      resumeOrPlay();
+      resumeOrPlay(currentPosition);
     }
   }
 
@@ -64,18 +64,25 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
       state = state.copyWith(status: PlaybackStatus.paused);
     } else {
       if (state.currentFile != null) {
-        resumeOrPlay();
+        resumeOrPlay(state.position);
         state = state.copyWith(status: PlaybackStatus.playing);
       }
     }
   }
 
-  Future<void> resumeOrPlay() async {
+  Future<void> resumeOrPlay(final Duration position) async {
     _listenToPosition();
-    if (currentAudioPlayerService.hasAudioSource) {
-      currentAudioPlayerService.resume();
+    if (state.hapticMode == HapticMode.enabled) {
+      currentAudioPlayerService.play(
+        state.currentFile!,
+        position.inMilliseconds,
+      );
     } else {
-      currentAudioPlayerService.play(state.currentFile!);
+      if (currentAudioPlayerService.hasAudioSource) {
+        currentAudioPlayerService.resume(state.currentFile!);
+      } else {
+        currentAudioPlayerService.play(state.currentFile!);
+      }
     }
   }
 

@@ -8,6 +8,7 @@ abstract class HapticFilterService {
   /// Throws an exception if processing fails.
   Future<String> applyHapticFilter(
     AudioFile audioFile,
+    int position,
     Function(String) sourceSetter,
   ) async => throw UnimplementedError();
 }
