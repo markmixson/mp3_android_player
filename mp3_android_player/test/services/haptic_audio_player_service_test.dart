@@ -69,9 +69,10 @@ void main() {
       test('get', () async {
         final duration = Duration(minutes: 5);
         final position = 5000;
+        final positionDuration = Duration(milliseconds: position);
         when(
           () => mockPlayer.createPositionStream(
-            steps: duration.inSeconds,
+            steps: duration.inSeconds - positionDuration.inSeconds,
             minPeriod: Duration(milliseconds: position),
             maxPeriod: duration,
           ),
@@ -95,7 +96,7 @@ void main() {
         final duration = Duration(minutes: 5);
         when(
           () => mockPlayer.createPositionStream(
-            steps: duration.inSeconds,
+            steps: 1,
             minPeriod: duration,
             maxPeriod: duration,
           ),

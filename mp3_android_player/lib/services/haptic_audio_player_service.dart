@@ -48,10 +48,11 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
     final AudioFile audioFile, [
     int position = 0,
   ]) {
+    final positionDuration = Duration(milliseconds: position);
     return _player
         .createPositionStream(
-          steps: audioFile.duration.inSeconds,
-          minPeriod: Duration(milliseconds: position),
+          steps: audioFile.duration.inSeconds - positionDuration.inSeconds,
+          minPeriod: positionDuration,
           maxPeriod: audioFile.duration,
         )
         .cast<Duration>();
@@ -61,7 +62,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   Stream<Duration> getDurationStream(final AudioFile audioFile) {
     return _player
         .createPositionStream(
-          steps: audioFile.duration.inSeconds,
+          steps: 1,
           minPeriod: audioFile.duration,
           maxPeriod: audioFile.duration,
         )
