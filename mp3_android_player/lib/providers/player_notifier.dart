@@ -93,10 +93,10 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
   }
 
   void _listenToPosition() {
-    currentAudioPlayerService.positionStream.listen((pos) {
+    currentAudioPlayerService.getPositionStream(state.currentFile!, state.position.inMilliseconds).listen((pos) {
       state = state.copyWith(position: pos);
     });
-    currentAudioPlayerService.durationStream.listen((dur) {
+    currentAudioPlayerService.getDurationStream(state.currentFile!).listen((dur) {
       state = state.copyWith(duration: dur);
     });
   }

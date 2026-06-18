@@ -79,7 +79,7 @@ void main() {
         () => mockAudioPlayer.positionStream,
       ).thenAnswer((_) => mockStream.cast<Duration>());
 
-      final stream = audioPlayerService.positionStream;
+      final stream = audioPlayerService.getPositionStream(audioFile);
 
       expect(stream, isA<Stream<Duration>>());
     });
@@ -90,7 +90,7 @@ void main() {
         () => mockAudioPlayer.durationStream,
       ).thenAnswer((_) => mockStream.cast<Duration>());
 
-      final stream = audioPlayerService.durationStream;
+      final stream = audioPlayerService.getDurationStream(audioFile);
 
       expect(stream, isA<Stream<Duration>>());
     });

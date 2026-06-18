@@ -66,16 +66,16 @@ void main() {
     preferenceService = MockPreferenceService();
 
     when(
-      () => audioService.positionStream,
+      () => audioService.getPositionStream(any(), any()),
     ).thenAnswer((_) => defaultPositionController.stream);
     when(
-      () => audioService.durationStream,
+      () => audioService.getDurationStream(any()),
     ).thenAnswer((_) => defaultDurationController.stream);
     when(
-      () => hapticAudioService.positionStream,
+      () => hapticAudioService.getPositionStream(any(), any()),
     ).thenAnswer((_) => hapticPositionController.stream);
     when(
-      () => hapticAudioService.durationStream,
+      () => hapticAudioService.getDurationStream(any()),
     ).thenAnswer((_) => hapticDurationController.stream);
 
     when(() => audioService.pause()).thenAnswer((_) async => {});

@@ -48,13 +48,13 @@ Widget getMainScreen(
               ),
               const SizedBox(height: 20),
               StreamBuilder<Duration>(
-                stream: currentAudioPlayerService.positionStream,
+                stream: currentAudioPlayerService.getPositionStream(state.currentFile!, state.position.inMilliseconds),
                 builder: (context, snapshot) {
                   final position = snapshot.data ?? Duration.zero;
                   return Column(
                     children: [
                       StreamBuilder<Duration>(
-                        stream: currentAudioPlayerService.durationStream,
+                        stream: currentAudioPlayerService.getDurationStream(state.currentFile!),
                         builder: (context, snapshot) {
                           final duration = snapshot.data ?? Duration.zero;
                           final double current = position.inMilliseconds

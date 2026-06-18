@@ -7,8 +7,8 @@ abstract class AudioPlayerService {
   void pause() => throw UnimplementedError();
   Future<void> resume(AudioFile audioFile, [int position = 0]) => throw UnimplementedError();
   Future<void> seek(Duration position) async => throw UnimplementedError();
-  Stream<Duration> get positionStream;
-  Stream<Duration> get durationStream;
+  Stream<Duration> getPositionStream(AudioFile audioFile, [int position = 0]) => throw UnimplementedError();
+  Stream<Duration> getDurationStream(AudioFile audioFile) => throw UnimplementedError();
   void stop() => throw UnimplementedError();
   bool get hasAudioSource => throw UnimplementedError();
 }

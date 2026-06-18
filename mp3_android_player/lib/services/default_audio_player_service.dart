@@ -28,12 +28,17 @@ class DefaultAudioPlayerService implements AudioPlayerService {
   }
 
   @override
-  Stream<Duration> get positionStream =>
-      _player.positionStream.cast<Duration>();
+  Stream<Duration> getPositionStream(
+    final AudioFile audioFile, [
+    int position = 0,
+  ]) {
+    return _player.positionStream.cast<Duration>();
+  }
 
   @override
-  Stream<Duration> get durationStream =>
-      _player.durationStream.cast<Duration>();
+  Stream<Duration> getDurationStream(final AudioFile audioFile) {
+    return _player.durationStream.cast<Duration>();
+  }
 
   @override
   void stop() async {

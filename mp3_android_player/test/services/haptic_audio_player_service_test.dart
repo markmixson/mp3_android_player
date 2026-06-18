@@ -48,6 +48,7 @@ void main() {
       registerFallbackValue(MockFFmpegSession());
       registerFallbackValue(MockAudioFile());
       registerFallbackValue(MockAudioSource());
+      registerFallbackValue(Duration(seconds: 0));
     });
 
     setUp(() {
@@ -62,6 +63,54 @@ void main() {
         hapticFilterService: mockHapticFilter,
         fileHelper: mockFileHelper,
       );
+    });
+
+    group('getPositionStream', () {
+      test('get', () async {
+        final duration = Duration(minutes: 5);
+        final position = 5000;
+        when(
+          () => mockPlayer.createPositionStream(
+            steps: duration.inSeconds,
+            minPeriod: Duration(milliseconds: position),
+            maxPeriod: duration,
+          ),
+        ).thenAnswer((_) => Stream<Duration>.empty());
+        service.getPositionStream(
+          AudioFile(path: '', name: '', duration: duration),
+          position,
+        );
+        verify(
+          () => mockPlayer.createPositionStream(
+            steps: any(named: 'steps'),
+            minPeriod: any(named: 'minPeriod'),
+            maxPeriod: any(named: 'maxPeriod'),
+          ),
+        ).called(1);
+      });
+    });
+
+    group('getDurationStream', () {
+      test('get', () async {
+        final duration = Duration(minutes: 5);
+        when(
+          () => mockPlayer.createPositionStream(
+            steps: duration.inSeconds,
+            minPeriod: duration,
+            maxPeriod: duration,
+          ),
+        ).thenAnswer((_) => Stream<Duration>.empty());
+        service.getDurationStream(
+          AudioFile(path: '', name: '', duration: duration),
+        );
+        verify(
+          () => mockPlayer.createPositionStream(
+            steps: any(named: 'steps'),
+            minPeriod: any(named: 'minPeriod'),
+            maxPeriod: any(named: 'maxPeriod'),
+          ),
+        ).called(1);
+      });
     });
 
     group('seek', () {

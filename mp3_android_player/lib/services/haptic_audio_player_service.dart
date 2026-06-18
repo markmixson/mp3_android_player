@@ -43,6 +43,31 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
     // nothing to initialize
   }
 
+  @override
+  Stream<Duration> getPositionStream(
+    final AudioFile audioFile, [
+    int position = 0,
+  ]) {
+    return _player
+        .createPositionStream(
+          steps: audioFile.duration.inSeconds,
+          minPeriod: Duration(milliseconds: position),
+          maxPeriod: audioFile.duration,
+        )
+        .cast<Duration>();
+  }
+
+  @override
+  Stream<Duration> getDurationStream(final AudioFile audioFile) {
+    return _player
+        .createPositionStream(
+          steps: audioFile.duration.inSeconds,
+          minPeriod: audioFile.duration,
+          maxPeriod: audioFile.duration,
+        )
+        .cast<Duration>();
+  }
+
   Future<String> _applyHapticFilter(
     final AudioFile audioFile,
     int position,

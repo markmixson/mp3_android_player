@@ -43,16 +43,16 @@ void main() {
 
     // Setup default stream behaviors
     when(
-      () => mockDefaultAudioPlayerService.positionStream,
+      () => mockDefaultAudioPlayerService.getPositionStream(any(), any()),
     ).thenAnswer((_) => Stream.value(Duration.zero));
     when(
-      () => mockDefaultAudioPlayerService.durationStream,
+      () => mockDefaultAudioPlayerService.getDurationStream(any()),
     ).thenAnswer((_) => Stream.value(Duration.zero));
     when(
-      () => mockHapticAudioPlayerService.positionStream,
+      () => mockHapticAudioPlayerService.getPositionStream(any(), any()),
     ).thenAnswer((_) => Stream.value(Duration.zero));
     when(
-      () => mockHapticAudioPlayerService.durationStream,
+      () => mockHapticAudioPlayerService.getDurationStream(any()),
     ).thenAnswer((_) => Stream.value(Duration.zero));
     when(
       () => mockPreferenceService.getHapticMode(),
