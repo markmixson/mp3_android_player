@@ -1,17 +1,25 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:mp3_android_player/services/haptic_service_interface.dart';
 import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
 
 class MockFile extends Mock implements File {}
 
+class MockHapticService extends Mock implements HapticService {}
+
 void main() {
-  group('HapticStreamAudioSource', () {
+  group('LowPassStreamAudioSource', () {
     late MockFile mockFile;
+    late HapticService mockHapticService;
     const String testContentType = 'audio/mpeg';
+    const Duration testDuration = Duration(milliseconds: 20);
 
     setUp(() {
       mockFile = MockFile();
+      mockHapticService = MockHapticService();
+      registerFallbackValue(Duration(milliseconds: 20));
     });
 
     group('request', () {
@@ -46,22 +54,45 @@ void main() {
         final int? start = params['start'] as int?;
         final int? end = params['end'] as int?;
         final int fileLength = params['fileLength'] as int;
-        final int expectedContentLength = params['expectedContentLength'] as int;
+        final int expectedContentLength =
+            params['expectedContentLength'] as int;
         final int expectedOffset = params['expectedOffset'] as int;
         final String description = params['description'] as String;
 
         test(description, () async {
-          when(() => mockFile.length()).thenAnswer((_) async => fileLength.toInt());
-          when(() => mockFile.openRead(any(), any())).thenAnswer((_) => Stream.value(List.filled(10, 0)));
-          final source = HapticStreamAudioSource(mockFile, testContentType);
+          when(
+            () => mockFile.length(),
+          ).thenAnswer((_) async => fileLength.toInt());
+          when(() => mockFile.openRead(any(), any())).thenAnswer(
+            (_) => Stream.value(List.filled(10, 0)).asBroadcastStream(),
+          );
+          when(
+            () =>
+                mockHapticService.playHapticPattern(List.filled(10, 0), any()),
+          ).thenAnswer((_) async => {});
+          final source = HapticStreamAudioSource(
+            mockFile,
+            testContentType,
+            mockHapticService,
+            testDuration,
+          );
 
           final response = await source.request(start, end);
+          response.stream.listen(
+            (data) {
+              expect(data, List.filled(10, 0));
+            },
+            onError: (error) {
+              fail('stream value did not return as expected!');
+            },
+          );
 
           expect(response.sourceLength, equals(fileLength.toDouble()));
           expect(response.contentLength, equals(expectedContentLength));
           expect(response.offset, equals(expectedOffset));
           expect(response.contentType, equals(testContentType));
           expect(response.stream, isA<Stream<List<int>>>());
+          await response.stream.drain();
         });
       }
     });

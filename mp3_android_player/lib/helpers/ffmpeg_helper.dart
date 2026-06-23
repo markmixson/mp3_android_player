@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_audio_flutter/return_code.dart';
-import 'package:mp3_android_player/helpers/ffmpeg_wrapper.dart';
+import 'package:mp3_android_player/wrappers/ffmpeg_wrapper.dart';
 
 class FFmpegHelper {
   final Completer<String> _completer = Completer();

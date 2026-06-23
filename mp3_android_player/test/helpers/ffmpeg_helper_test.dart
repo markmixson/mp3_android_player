@@ -3,7 +3,7 @@ import 'package:ffmpeg_kit_audio_flutter/return_code.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_helper.dart';
-import 'package:mp3_android_player/helpers/ffmpeg_wrapper.dart';
+import 'package:mp3_android_player/wrappers/ffmpeg_wrapper.dart';
 
 // Mock the wrapper to bypass actual FFmpeg calls
 class MockFFmpegWrapper extends Mock implements FFmpegWrapper {}

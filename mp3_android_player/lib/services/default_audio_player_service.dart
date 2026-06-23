@@ -53,8 +53,4 @@ class DefaultAudioPlayerService implements AudioPlayerService {
   Future<dynamic> initialize(final AudioFile audioFile) async {
     return _player.setFilePath(audioFile.path);
   }
-
-  void dispose() {
-    _player.dispose();
-  }
 }

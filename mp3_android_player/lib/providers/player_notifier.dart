@@ -9,16 +9,16 @@ import 'package:mp3_android_player/services/preference_service_interface.dart';
 
 class PlayerNotifier extends StateNotifier<PlayerState> {
   final AudioPlayerService _defaultAudioPlayerService;
-  final AudioPlayerService _hapticAudioPlayerService;
+  final AudioPlayerService _lowPassAudioPlayerService;
   final AudioFilePickerService _audioFilePickerService;
 
   PlayerNotifier({
     required AudioPlayerService audioPlayerService,
     required AudioFilePickerService audioFilePickerService,
-    required AudioPlayerService hapticAudioPlayerService,
+    required AudioPlayerService lowPassAudioPlayerService,
   }) : _defaultAudioPlayerService = audioPlayerService,
        _audioFilePickerService = audioFilePickerService,
-       _hapticAudioPlayerService = hapticAudioPlayerService,
+       _lowPassAudioPlayerService = lowPassAudioPlayerService,
        super(PlayerState());
 
   Future<void> toggleHapticMode(
@@ -46,7 +46,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
         hapticMode: prefs.getHapticMode(),
       );
       final myCurrentService = currentAudioPlayerService;
-      await _hapticAudioPlayerService.initialize(file);
+      await _lowPassAudioPlayerService.initialize(file);
       await _defaultAudioPlayerService.initialize(file);
       _listenToPosition();
       await myCurrentService.play(file);
@@ -81,7 +81,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
 
   AudioPlayerService get currentAudioPlayerService {
     return state.hapticMode == HapticMode.enabled
-        ? _hapticAudioPlayerService
+        ? _lowPassAudioPlayerService
         : _defaultAudioPlayerService;
   }
 
@@ -101,12 +101,12 @@ final playerNotifierProvider =
         defaultAudioPlayerServiceProvider,
       );
       final audioFilePickerService = ref.read(audioFilePickerServiceProvider);
-      final hapticAudioPlayerService = ref.read(
+      final lowPassAudioPlayerService = ref.read(
         hapticAudioPlayerServiceProvider,
       );
       return PlayerNotifier(
         audioPlayerService: defaultAudioPlayerService,
         audioFilePickerService: audioFilePickerService,
-        hapticAudioPlayerService: hapticAudioPlayerService,
+        lowPassAudioPlayerService: lowPassAudioPlayerService,
       );
     });

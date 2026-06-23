@@ -104,16 +104,6 @@ void main() {
       );
     });
 
-    test('dispose calls dispose on the underlying player', () {
-      when(
-        () => mockAudioPlayer.dispose(),
-      ).thenAnswer((_) => Future<void>.value());
-
-      audioPlayerService.dispose();
-
-      verify(() => mockAudioPlayer.dispose()).called(1);
-    });
-
     // Parameterized test cases to cover both branches of the boolean expression
     final testCases = [
       {

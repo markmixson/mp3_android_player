@@ -1,6 +1,7 @@
 import 'dart:io';
 
-class FileHelper {
+// coverage:ignore-file
+class FileWrapper {
   File getFile(final String path) {
     return File(path);
   }
