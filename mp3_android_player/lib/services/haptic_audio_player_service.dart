@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/wrappers/file_wrapper.dart';
-import 'package:mp3_android_player/helpers/mime_helper.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
 import 'package:mp3_android_player/services/default_audio_player_service.dart';
 import 'package:mp3_android_player/services/haptic_service_interface.dart';
@@ -11,21 +10,18 @@ import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
 class HapticAudioPlayerService extends DefaultAudioPlayerService {
   final AudioPlayer _player;
   final LowPassFilterService _lowPassFilterService;
-  final MimeHelper _mimeHelper;
   final FileWrapper _fileWrapper;
   final HapticService _hapticService;
-  static const String defaultType = 'audio/wav';
+  static const String defaultType = 'audio/l16; rate=44100; channels=1; endianness=little-endian';
   static const Duration sampleWindowSize = Duration(milliseconds: 20);
 
   HapticAudioPlayerService({
     required super.player,
     required LowPassFilterService lowPassFilterService,
-    required MimeHelper mimeHelper,
     required FileWrapper fileWrapper,
     required HapticService hapticService,
   }) : _player = player,
        _lowPassFilterService = lowPassFilterService,
-       _mimeHelper = mimeHelper,
        _fileWrapper = fileWrapper,
        _hapticService = hapticService;
 
@@ -48,17 +44,16 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
       processedPath,
     ) async {
       final file = _fileWrapper.getFile(processedPath);
-      final contentType = _mimeHelper.getMimeType(processedPath, defaultType);
       final source = HapticStreamAudioSource(
         file,
-        contentType,
+        defaultType,
         _hapticService,
         sampleWindowSize,
       );
       await _player.setVolume(0.0);
       await _player.setAudioSource(source);
       debugPrint(
-        "player source initialized for $processedPath, $file of type $contentType",
+        "player source initialized for $processedPath, $file of type $defaultType",
       );
       return processedPath;
     }));

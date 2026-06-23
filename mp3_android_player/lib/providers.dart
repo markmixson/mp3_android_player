@@ -6,7 +6,6 @@ import 'package:mp3_android_player/wrappers/advanced_haptics_wrapper.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_helper.dart';
 import 'package:mp3_android_player/wrappers/ffmpeg_wrapper.dart';
 import 'package:mp3_android_player/wrappers/file_wrapper.dart';
-import 'package:mp3_android_player/helpers/mime_helper.dart';
 import 'package:mp3_android_player/wrappers/temporary_directory_wrapper.dart';
 import 'package:mp3_android_player/services/audio_file_picker_service_interface.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
@@ -84,7 +83,6 @@ final hapticAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
   return HapticAudioPlayerService(
     player: audioPlayer,
     lowPassFilterService: lowPassFilterService,
-    mimeHelper: MimeHelper(),
     fileWrapper: FileWrapper(),
     hapticService: hapticService,
   );
