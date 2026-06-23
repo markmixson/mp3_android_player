@@ -25,7 +25,6 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
        _fileWrapper = fileWrapper,
        _hapticService = hapticService;
 
-
   @override
   void pause() {
     _hapticService.stopHaptics();
@@ -50,7 +49,6 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
         _hapticService,
         sampleWindowSize,
       );
-      await _player.setVolume(0.0);
       await _player.setAudioSource(source);
       debugPrint(
         "player source initialized for $processedPath, $file of type $defaultType",
