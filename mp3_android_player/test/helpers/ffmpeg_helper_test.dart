@@ -67,7 +67,7 @@ void main() {
         () => mockSession.getReturnCode(),
       ).thenAnswer((_) async => ReturnCode(255));
       when(
-        () => mockSession.getFailStackTrace(),
+        () => mockSession.getAllLogsAsString(),
       ).thenAnswer((_) async => 'Error details');
 
       expect(

@@ -30,9 +30,9 @@ class FFmpegHelper {
         tempFiles.add(outputPath);
         _completer.complete(outputPath);
       } else {
-        final failStackTrace = await session.getFailStackTrace();
+        final logs = await session.getAllLogsAsString();
         _completer.completeError(
-          Exception('FFmpeg failed to apply low-pass filter: $failStackTrace'),
+          Exception('FFmpeg failed to apply low-pass filter: $logs'),
         );
       }
     });
