@@ -33,11 +33,11 @@ class DefaultLowPassFilterService implements LowPassFilterService {
     // Use .pcm extension for raw PCM data
     final outputPath = p.join(tempDir.path, 'haptic_$time.wav');
     _tempFiles.add(outputPath);
-    // -f s16le: 16-bit little-endian PCM
+    // -f wav -c:a pcm_s16le: 16-bit little-endian PCM wav
     // -ar 44100: 44.1kHz sample rate
     // -ac 1: Mono
     // -af lowpass=f=250: Low-pass filter at 250Hz to focus on bass/transients for haptics
-    final options = '-i "$path" -y -f wav -ar 44100 -ac 1 -af lowpass=f=250 "$outputPath"';
+    final options = '-i "$path" -y -f wav -c:a pcm_s16le -ar 44100 -ac 1 -af lowpass=f=250 "$outputPath"';
     // Apply a low-pass filter at 250Hz and downmix stereo to mono
     return _ffmpegHelper
         .executeAsync(_tempFiles, outputPath, options)
