@@ -12,7 +12,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   final LowPassFilterService _lowPassFilterService;
   final FileWrapper _fileWrapper;
   final HapticService _hapticService;
-  static const String defaultType = 'audio/l16; rate=44100; channels=1; endianness=little-endian';
+  static const String defaultType = 'audio/wav';
   static const Duration sampleWindowSize = Duration(milliseconds: 20);
 
   HapticAudioPlayerService({
