@@ -14,7 +14,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   final MimeHelper _mimeHelper;
   final FileWrapper _fileWrapper;
   final HapticService _hapticService;
-  static const String defaultType = 'audio/mpeg';
+  static const String defaultType = 'audio/wav';
   static const Duration sampleWindowSize = Duration(milliseconds: 20);
 
   HapticAudioPlayerService({
