@@ -30,9 +30,9 @@ class DefaultLowPassFilterService implements LowPassFilterService {
     final tempDir = await _temporaryDirectoryWrapper.getTemporaryDirectory();
     final time = _clock.now().millisecondsSinceEpoch;
     final path = audioFile.path;
-    final outputPath = p.join(tempDir.path, 'haptic_$time.wav');
+    final outputPath = p.join(tempDir.path, 'haptic_$time.mka');
     _tempFiles.add(outputPath);
-    final options = '-i "$path" -y -f wav -acodec pcm_s16le -ar 44100 -ac 1 -af lowpass=f=250 "$outputPath"';
+    final options = '-i "$path" -y -f matroska -acodec pcm_s16le -ar 44100 -ac 1 -af lowpass=f=250 "$outputPath"';
     return _ffmpegHelper
         .executeAsync(_tempFiles, outputPath, options)
         .then((output) async => sourceSetter.call(output));
