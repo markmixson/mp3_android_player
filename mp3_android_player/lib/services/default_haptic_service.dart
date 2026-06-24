@@ -21,7 +21,7 @@ class DefaultHapticService implements HapticService {
     if (pattern.isNotEmpty) {
       final amplitudes = _processor.processPcmData(pattern);
       try {
-        return await _hapticsWrapper.playWaveform(
+        return _hapticsWrapper.playWaveform(
           List.filled(amplitudes.length, sampleWindowDuration.inMilliseconds),
           amplitudes,
         );
@@ -33,6 +33,6 @@ class DefaultHapticService implements HapticService {
 
   @override
   Future<void> stopHaptics() async {
-    return await _hapticsWrapper.stop();
+    return _hapticsWrapper.stop();
   }
 }

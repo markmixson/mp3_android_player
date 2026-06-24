@@ -26,12 +26,13 @@ class HapticStreamAudioSource extends StreamAudioSource {
     final myStart = start ?? 0;
     final length = await _file.length();
     final myEnd = end ?? length;
+    final List<Future<dynamic>> futures = [];
     return StreamAudioResponse(
       sourceLength: length,
       contentLength: myEnd - myStart,
       offset: myStart,
-      stream: _file.openRead(start, end).map((list) {
-        Isolate.run(() => _hapticService.playHapticPattern(list, _sampleWindowDuration));
+      stream: _file.openRead(start, end).asyncMap((list) async {
+        futures.add(Isolate.run(() async => _hapticService.playHapticPattern(list, _sampleWindowDuration)));
         return list;
       }),
       contentType: _contentType,
