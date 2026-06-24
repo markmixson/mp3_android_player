@@ -1,6 +1,7 @@
 // ignore_for_file: experimental_member_use
 
 import 'dart:io';
+import 'dart:isolate';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/services/haptic_service_interface.dart';
 
@@ -30,7 +31,7 @@ class HapticStreamAudioSource extends StreamAudioSource {
       contentLength: myEnd - myStart,
       offset: myStart,
       stream: _file.openRead(start, end).map((list) {
-        _hapticService.playHapticPattern(list, _sampleWindowDuration);
+        Isolate.run(() => _hapticService.playHapticPattern(list, _sampleWindowDuration));
         return list;
       }),
       contentType: _contentType,
