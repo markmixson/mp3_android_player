@@ -16,13 +16,13 @@ class DefaultHapticService implements HapticService {
   @override
   Future<void> playHapticPattern(
     List<int> pattern,
-    final Duration sampleWindowDuration,
+    final int sampleWindowDurationMillis,
   ) async {
     if (pattern.isNotEmpty) {
       final amplitudes = _processor.processPcmData(pattern);
       try {
         return _hapticsWrapper.playWaveform(
-          List.filled(amplitudes.length, sampleWindowDuration.inMilliseconds),
+          List.filled(amplitudes.length, sampleWindowDurationMillis),
           amplitudes,
         );
       } catch (e) {

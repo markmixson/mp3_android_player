@@ -55,13 +55,13 @@ void main() {
           when(() => mockProcessor.processPcmData(pattern)).thenReturn(amplitudes);
           when(() => mockHapticsWrapper.playWaveform(any(), any())).thenAnswer((_) async => {});
 
-          await defaultHapticService.playHapticPattern(pattern, duration);
+          await defaultHapticService.playHapticPattern(pattern, duration.inMilliseconds);
 
           final expectedTimings = List<int>.filled(amplitudes.length, duration.inMilliseconds);
           verify(() => mockProcessor.processPcmData(pattern)).called(1);
           verify(() => mockHapticsWrapper.playWaveform(expectedTimings, amplitudes)).called(1);
         } else {
-          await defaultHapticService.playHapticPattern(pattern, duration);
+          await defaultHapticService.playHapticPattern(pattern, duration.inMilliseconds);
 
           verifyNever(() => mockProcessor.processPcmData(any()));
           verifyNever(() => mockHapticsWrapper.playWaveform(any(), any()));
@@ -78,7 +78,7 @@ void main() {
       when(() => mockHapticsWrapper.playWaveform(any(), any())).thenThrow(Exception('Test error'));
 
       // Should not throw exception
-      await defaultHapticService.playHapticPattern(pattern, duration);
+      await defaultHapticService.playHapticPattern(pattern, duration.inMilliseconds);
 
       verify(() => mockProcessor.processPcmData(pattern)).called(1);
       verify(() => mockHapticsWrapper.playWaveform(any(), any())).called(1);

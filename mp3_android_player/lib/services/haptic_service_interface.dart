@@ -3,7 +3,7 @@ abstract class HapticService {
   /// Plays a pattern of haptic amplitude samples.
   Future<void> playHapticPattern(
     List<int> pattern,
-    Duration sampleWindowDuration,
+    int sampleWindowDurationMillis,
   ) async => throw UnimplementedError();
 
   /// Stops any ongoing haptic playback.
