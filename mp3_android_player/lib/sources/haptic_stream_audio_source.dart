@@ -10,7 +10,11 @@ import 'package:rxdart/rxdart.dart';
 class HapticStreamAudioSource extends StreamAudioSource {
   final File _file;
   final String _contentType;
-  final void Function(List<int> list, ReceivePort receivePort, RootIsolateToken? rootToken)
+  final void Function(
+    List<int> list,
+    ReceivePort receivePort,
+    RootIsolateToken? rootToken,
+  )
   _processorFunction;
   HapticMode hapticMode;
   final RootIsolateToken? _rootToken;
@@ -20,7 +24,7 @@ class HapticStreamAudioSource extends StreamAudioSource {
     this._contentType,
     this._processorFunction,
     this.hapticMode,
-    this._rootToken
+    this._rootToken,
   );
 
   @override
@@ -33,6 +37,22 @@ class HapticStreamAudioSource extends StreamAudioSource {
     final myEnd = end ?? length;
     final audioSubject = PublishSubject<List<int>>();
     final receivePort = getReceivePort(audioSubject);
+    return StreamAudioResponse(
+      sourceLength: length,
+      contentLength: myEnd - myStart,
+      offset: myStart,
+      stream: audioSubject.stream.doOnListen(
+        () async => startRead(start, end, receivePort),
+      ),
+      contentType: _contentType,
+    );
+  }
+
+  void startRead(
+    final int? start,
+    final int? end,
+    final ReceivePort receivePort,
+  ) async {
     await _file
         .openRead(start, end)
         .doOnDone(() async => receivePort.sendPort.send('done'))
@@ -41,13 +61,6 @@ class HapticStreamAudioSource extends StreamAudioSource {
               ? _processorFunction(list, receivePort, _rootToken)
               : receivePort.sendPort.send(list),
         );
-    return StreamAudioResponse(
-      sourceLength: length,
-      contentLength: myEnd - myStart,
-      offset: myStart,
-      stream: audioSubject.stream,
-      contentType: _contentType,
-    );
   }
 
   ReceivePort getReceivePort(final PublishSubject<List<int>> audioSubject) {

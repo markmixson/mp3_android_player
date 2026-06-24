@@ -134,6 +134,7 @@ void main() {
               fail('stream value did not return as expected!');
             },
           );
+          await response.stream.drain();
 
           if (hapticModeEnabled) {
             verify(
@@ -150,7 +151,6 @@ void main() {
           expect(response.offset, equals(expectedOffset));
           expect(response.contentType, equals(testContentType));
           expect(response.stream, isA<Stream<List<int>>>());
-          await response.stream.drain();
         });
       }
     });
