@@ -1,7 +1,7 @@
 // coverage:ignore-file
 abstract class HapticService {
   /// Plays a pattern of haptic amplitude samples.
-  Future<void> playHapticPattern(
+  Future<int> playHapticPattern(
     List<int> pattern,
     int sampleWindowDurationMillis,
   ) async => throw UnimplementedError();

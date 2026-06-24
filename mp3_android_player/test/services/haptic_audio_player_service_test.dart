@@ -91,7 +91,7 @@ void main() {
           when(() => mockPlayer.play()).thenAnswer((_) async => {});
           when(
             () => mockHapticService.playHapticPattern(any(), any()),
-          ).thenAnswer((_) async => {});
+          ).thenAnswer((_) async => 12345);
           when(() => mockPlayer.stop()).thenAnswer((_) async => {});
           when(() => mockPlayer.pause()).thenAnswer((_) async => {});
           when(

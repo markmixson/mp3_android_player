@@ -69,7 +69,7 @@ void main() {
           when(
             () =>
                 mockHapticService.playHapticPattern(List.filled(10, 0), any()),
-          ).thenAnswer((_) async => {});
+          ).thenAnswer((_) async => 12345);
           final source = HapticStreamAudioSource(
             mockFile,
             testContentType,
