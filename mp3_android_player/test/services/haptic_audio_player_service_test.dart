@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,7 +30,7 @@ class MockAudioSource extends Mock implements AudioSource {}
 class MockHapticService extends Mock implements HapticService {}
 
 class MockHapticStreamAudioSourceBackground extends Mock {
-  void runInBackground(List<int> list, ReceivePort receivePort);
+  void runInBackground(List<int> list, ReceivePort receivePort, RootIsolateToken? rootToken);
 }
 
 Future<void> testParameterized(

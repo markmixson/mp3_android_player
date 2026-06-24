@@ -1,7 +1,9 @@
 import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:mp3_android_player/wrappers/file_wrapper.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
 import 'package:mp3_android_player/services/default_audio_player_service.dart';
@@ -15,16 +17,16 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   final FileWrapper _fileWrapper;
   final HapticService _hapticService;
   static const String defaultType = 'audio/matroska';
-    final void Function(List<int> list, ReceivePort receivePort) _processorFunction;
-
+  final void Function(List<int> list, ReceivePort receivePort, RootIsolateToken? rootToken)
+  _processorFunction;
 
   HapticAudioPlayerService({
     required super.player,
     required LowPassFilterService lowPassFilterService,
     required FileWrapper fileWrapper,
     required HapticService hapticService,
-    required void Function(List<int> list, ReceivePort receivePort) processorFunction,
-    
+    required void Function(List<int> list, ReceivePort receivePort, RootIsolateToken? rootToken)
+    processorFunction,
   }) : _player = player,
        _lowPassFilterService = lowPassFilterService,
        _fileWrapper = fileWrapper,
@@ -44,7 +46,11 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   }
 
   @override
-  Future<dynamic> initialize(final AudioFile audioFile) async {
+  Future<dynamic> initialize(
+    final AudioFile audioFile, [
+    final RootIsolateToken? rootToken,
+    final HapticMode? hapticMode,
+  ]) async {
     return _lowPassFilterService.applyLowPassFilter(audioFile, ((
       processedPath,
     ) async {
@@ -52,7 +58,9 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
       final source = HapticStreamAudioSource(
         file,
         defaultType,
-        _processorFunction
+        _processorFunction,
+        hapticMode ?? HapticMode.disabled,
+        rootToken
       );
       await _player.setAudioSource(source);
       debugPrint(

@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/models/audio_file.dart';
+import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
 
 class DefaultAudioPlayerService implements AudioPlayerService {
@@ -50,7 +53,14 @@ class DefaultAudioPlayerService implements AudioPlayerService {
   bool get hasAudioSource => _player.audioSource != null;
 
   @override
-  Future<dynamic> initialize(final AudioFile audioFile) async {
+  Future<dynamic> initialize(
+    final AudioFile audioFile, [
+    final RootIsolateToken? rootToken,
+    final HapticMode? hapticMode,
+  ]) async {
     return _player.setFilePath(audioFile.path);
   }
+  
+  @override
+  AudioSource? get audioSource => _player.audioSource;
 }

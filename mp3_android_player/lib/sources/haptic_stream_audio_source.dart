@@ -2,19 +2,25 @@
 
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:ui';
 import 'package:just_audio/just_audio.dart';
+import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HapticStreamAudioSource extends StreamAudioSource {
   final File _file;
   final String _contentType;
-  final void Function(List<int> list, ReceivePort receivePort)
+  final void Function(List<int> list, ReceivePort receivePort, RootIsolateToken? rootToken)
   _processorFunction;
+  HapticMode hapticMode;
+  final RootIsolateToken? _rootToken;
 
   HapticStreamAudioSource(
     this._file,
     this._contentType,
     this._processorFunction,
+    this.hapticMode,
+    this._rootToken
   );
 
   @override
@@ -30,7 +36,11 @@ class HapticStreamAudioSource extends StreamAudioSource {
     await _file
         .openRead(start, end)
         .doOnDone(() async => receivePort.sendPort.send('done'))
-        .forEach((list) async => _processorFunction(list, receivePort));
+        .forEach(
+          (list) async => hapticMode == HapticMode.enabled
+              ? _processorFunction(list, receivePort, _rootToken)
+              : receivePort.sendPort.send(list),
+        );
     return StreamAudioResponse(
       sourceLength: length,
       contentLength: myEnd - myStart,

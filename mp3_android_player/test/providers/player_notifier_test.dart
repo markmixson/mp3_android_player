@@ -61,7 +61,7 @@ void main() {
       () => mockDefaultAudioPlayerService.initialize(any()),
     ).thenAnswer((_) async => {});
     when(
-      () => mockHapticAudioPlayerService.initialize(any()),
+      () => mockHapticAudioPlayerService.initialize(any(), any(), any()),
     ).thenAnswer((_) async => {});
 
     container = ProviderContainer(
@@ -113,7 +113,7 @@ void main() {
       expect(notifier.state.currentFile, testFile);
       expect(notifier.state.status, PlaybackStatus.playing);
       verify(() => mockDefaultAudioPlayerService.play(testFile)).called(1);
-      verify(() => mockHapticAudioPlayerService.initialize(testFile)).called(1);
+      verify(() => mockHapticAudioPlayerService.initialize(testFile, any(), any())).called(1);
     });
 
     test('togglePlayPause should pause when playing', () async {

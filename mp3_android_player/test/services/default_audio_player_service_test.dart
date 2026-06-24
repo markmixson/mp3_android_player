@@ -132,9 +132,11 @@ void main() {
 
         // Act
         final result = audioPlayerService.hasAudioSource;
+        final audioSource = audioPlayerService.audioSource;
 
         // Assert
         expect(result, equals(expectedResult));
+        expect(audioSource, result ? isNotNull : isNull);
       });
     }
   });

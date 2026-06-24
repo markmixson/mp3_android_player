@@ -19,14 +19,13 @@ class HapticStreamAudioSourceBackground {
     ),
   );
 
-  static final RootIsolateToken? rootToken = RootIsolateToken.instance;
-
   static void runInBackground(
     final List<int> list,
     final ReceivePort receivePort,
+    final RootIsolateToken? rootToken
   ) async {
     Isolate.spawn((mainSendPort) async {
-      initialize();
+      initialize(rootToken);
       await hapticService.playHapticPattern(
         list,
         sampleWindowSize.inMilliseconds,
@@ -35,11 +34,11 @@ class HapticStreamAudioSourceBackground {
     }, receivePort.sendPort);
   }
 
-  static void initialize() {
+  static void initialize(final RootIsolateToken? rootToken) {
     if (rootToken == null) {
       debugPrint("can't get root token!");
     } else {
-      BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken!);
+      BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
     }
   }
 }

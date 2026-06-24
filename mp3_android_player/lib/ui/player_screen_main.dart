@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mp3_android_player/models/haptic_mode.dart';
@@ -17,18 +19,21 @@ Widget getMainScreen(
   final WidgetRef ref,
   final PreferenceService prefs,
 ) {
+  final rootToken = RootIsolateToken.instance;
   final state = ref.watch(playerNotifierProvider);
   final notifier = ref.watch(playerNotifierProvider.notifier);
   final defaultAudioPlayerService = ref.read(defaultAudioPlayerServiceProvider);
   final hapticAudioPlayerService = ref.read(hapticAudioPlayerServiceProvider);
-  final currentAudioPlayerService = prefs.getHapticMode() == HapticMode.enabled
+  final currentAudioPlayerService = state.hapticMode == HapticMode.enabled
       ? hapticAudioPlayerService
       : defaultAudioPlayerService;
   return state.isLoading
       ? Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(padding: EdgeInsets.only(bottom: 10.0),),
+            const CircularProgressIndicator(
+              padding: EdgeInsets.only(bottom: 10.0),
+            ),
             Text(
               state.currentFile != null
                   ? "Loading ${state.currentFile!.name}..."
@@ -85,7 +90,9 @@ Widget getMainScreen(
                   value: prefs.getHapticMode() == HapticMode.enabled,
                   onChanged: (bool value) async {
                     return notifier.toggleHapticMode(
-                      value ? HapticMode.enabled : HapticMode.disabled,
+                      state.hapticMode == HapticMode.disabled
+                          ? HapticMode.enabled
+                          : HapticMode.disabled,
                       prefs,
                     );
                   },
@@ -94,7 +101,8 @@ Widget getMainScreen(
                 const SizedBox(width: 20),
                 IconButton(
                   icon: const Icon(Icons.file_present),
-                  onPressed: () async => notifier.pickAndPlayFile(prefs),
+                  onPressed: () async =>
+                      notifier.pickAndPlayFile(prefs, rootToken),
                   enableFeedback: false,
                 ),
                 IconButton(

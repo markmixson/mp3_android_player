@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio/just_audio.dart' as ja;
 import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:mp3_android_player/models/player_state.dart';
 import 'package:mp3_android_player/models/player_status.dart';
@@ -6,6 +9,7 @@ import 'package:mp3_android_player/providers.dart';
 import 'package:mp3_android_player/services/audio_file_picker_service_interface.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
 import 'package:mp3_android_player/services/preference_service_interface.dart';
+import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
 
 class PlayerNotifier extends StateNotifier<PlayerState> {
   final AudioPlayerService _defaultAudioPlayerService;
@@ -32,12 +36,22 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     state = state.copyWith(hapticMode: mode);
     await preferenceService.setHapticMode(mode);
     await currentAudioPlayerService.seek(currentPosition);
+    updateLowPassAudioSource(_lowPassAudioPlayerService.audioSource, mode);
     if (state.status == PlaybackStatus.playing) {
       resumeOrPlay();
     }
   }
 
-  Future<void> pickAndPlayFile(final PreferenceService prefs) async {
+  static void updateLowPassAudioSource(final ja.AudioSource? audioSource, final HapticMode mode) {
+    if (audioSource is HapticStreamAudioSource) {
+      audioSource.hapticMode = mode;
+    }
+  }
+
+  Future<void> pickAndPlayFile(
+    final PreferenceService prefs,
+    [final RootIsolateToken? rootToken]
+  ) async {
     final file = await _audioFilePickerService.pickFile();
     if (file != null) {
       state = state.copyWith(
@@ -46,7 +60,11 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
         hapticMode: prefs.getHapticMode(),
       );
       final myCurrentService = currentAudioPlayerService;
-      await _lowPassAudioPlayerService.initialize(file);
+      await _lowPassAudioPlayerService.initialize(
+        file,
+        rootToken,
+        state.hapticMode,
+      );
       await _defaultAudioPlayerService.initialize(file);
       _listenToPosition();
       await myCurrentService.play(file);

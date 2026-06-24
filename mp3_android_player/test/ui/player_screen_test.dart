@@ -14,6 +14,7 @@ import 'package:mp3_android_player/providers/player_notifier.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
 import 'package:mp3_android_player/services/audio_file_picker_service_interface.dart';
 import 'package:mp3_android_player/services/preference_service_interface.dart';
+import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
 
 class MockAudioService extends Mock implements AudioPlayerService {}
 
@@ -22,6 +23,9 @@ class MockHapticAudioPlayerService extends Mock implements AudioPlayerService {}
 class MockFilePickerService extends Mock implements AudioFilePickerService {}
 
 class MockPreferenceService extends Mock implements PreferenceService {}
+
+class MockHapticStreamAudioSource extends Mock
+    implements HapticStreamAudioSource {}
 
 late ProviderContainer container;
 
@@ -34,6 +38,7 @@ void main() {
   late StreamController<Duration> hapticPositionController;
   late StreamController<Duration> hapticDurationController;
   late MockPreferenceService preferenceService;
+  late MockHapticStreamAudioSource hapticStreamAudioSource;
 
   const audioFile = AudioFile(
     path: 'test/path/to/audio.mp3',
@@ -64,6 +69,7 @@ void main() {
     hapticPositionController = StreamController<Duration>.broadcast();
     hapticDurationController = StreamController<Duration>.broadcast();
     preferenceService = MockPreferenceService();
+    hapticStreamAudioSource = MockHapticStreamAudioSource();
 
     when(
       () => audioService.positionStream,
@@ -88,7 +94,12 @@ void main() {
     when(() => hapticAudioService.resume()).thenAnswer((_) async => {});
     when(() => hapticAudioService.play(any())).thenAnswer((_) async => {});
     when(() => hapticAudioService.seek(any())).thenAnswer((_) async {});
-    when(() => hapticAudioService.initialize(any())).thenAnswer((_) async {});
+    when(
+      () => hapticAudioService.initialize(any(), any(), any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => hapticAudioService.audioSource,
+    ).thenReturn(hapticStreamAudioSource);
 
     when(() => audioService.hasAudioSource).thenReturn(true);
     when(() => hapticAudioService.hasAudioSource).thenReturn(true);
@@ -229,17 +240,30 @@ void main() {
         currentFile: audioFile,
         status: PlaybackStatus.playing,
       );
+
       await tester.pumpAndSettle();
 
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
       verify(() => audioService.pause()).called(1);
+      verify(
+        () => hapticStreamAudioSource.hapticMode = HapticMode.enabled,
+      ).called(1);
+
+      await tester.pumpAndSettle();
+
+      when(
+        () => preferenceService.getHapticMode(),
+      ).thenReturn(HapticMode.enabled);
 
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
       verify(() => hapticAudioService.pause()).called(1);
+      verify(
+        () => hapticStreamAudioSource.hapticMode = HapticMode.disabled,
+      ).called(1);
     });
 
     testWidgets('slider seek updates position stream and calls seek', (
@@ -276,7 +300,7 @@ void main() {
         container.read(playerNotifierProvider.notifier).state = PlayerState(
           isLoading: isLoading,
           currentFile: currentFile,
-          status: PlaybackStatus.stopped
+          status: PlaybackStatus.stopped,
         );
         await tester.pumpWidget(buildPlayerScreen());
         await tester.pump();
