@@ -57,7 +57,7 @@ class HapticStreamAudioSource extends StreamAudioSource {
         .openRead(start, end)
         .doOnDone(() async => receivePort.sendPort.send('done'))
         .forEach(
-          (list) async => hapticMode == HapticMode.enabled
+          (list) => hapticMode == HapticMode.enabled
               ? _processorFunction(list, receivePort, _rootToken)
               : receivePort.sendPort.send(list),
         );

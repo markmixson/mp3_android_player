@@ -22,10 +22,10 @@ class HapticStreamAudioSourceBackground {
     final List<int> list,
     final ReceivePort receivePort,
     final RootIsolateToken? rootToken
-  ) async {
+  ) {
     Isolate.spawn((mainSendPort) async {
       initialize(rootToken);
-      hapticService.playHapticPattern(
+      await hapticService.playHapticPattern(
         list,
         sampleWindowSize.inMilliseconds,
       );
