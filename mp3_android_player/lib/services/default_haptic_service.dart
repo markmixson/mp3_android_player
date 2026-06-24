@@ -21,13 +21,9 @@ class DefaultHapticService implements HapticService {
     if (pattern.isNotEmpty) {
       final amplitudes = _processor.processPcmData(pattern);
       try {
-        final timings = List.filled(
-          amplitudes.length,
-          sampleWindowDuration.inMilliseconds,
-        );
         return _hapticsWrapper.playWaveform(
-          [0, ...timings],
-          [0, ...amplitudes],
+          List.filled(amplitudes.length, sampleWindowDuration.inMilliseconds),
+          amplitudes,
         );
       } catch (e) {
         debugPrint('Error playing haptic pattern: $e');

@@ -59,7 +59,7 @@ void main() {
 
           final expectedTimings = List<int>.filled(amplitudes.length, duration.inMilliseconds);
           verify(() => mockProcessor.processPcmData(pattern)).called(1);
-          verify(() => mockHapticsWrapper.playWaveform([0, ...expectedTimings], [0, ...amplitudes])).called(1);
+          verify(() => mockHapticsWrapper.playWaveform(expectedTimings, amplitudes)).called(1);
         } else {
           await defaultHapticService.playHapticPattern(pattern, duration);
 
