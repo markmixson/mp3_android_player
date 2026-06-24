@@ -29,8 +29,8 @@ class HapticStreamAudioSourceBackground {
         list,
         sampleWindowSize.inMilliseconds,
       );
-      mainSendPort.send(list);
     }, receivePort.sendPort);
+    receivePort.sendPort.send(list);
   }
 
   static void initialize(final RootIsolateToken? rootToken) {
