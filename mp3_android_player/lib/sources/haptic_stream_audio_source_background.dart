@@ -1,5 +1,4 @@
 import 'dart:isolate';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -26,7 +25,7 @@ class HapticStreamAudioSourceBackground {
   ) async {
     Isolate.spawn((mainSendPort) async {
       initialize(rootToken);
-      await hapticService.playHapticPattern(
+      hapticService.playHapticPattern(
         list,
         sampleWindowSize.inMilliseconds,
       );
