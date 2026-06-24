@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,6 +28,10 @@ class MockAudioSource extends Mock implements AudioSource {}
 
 class MockHapticService extends Mock implements HapticService {}
 
+class MockHapticStreamAudioSourceBackground extends Mock {
+  void runInBackground(List<int> list, ReceivePort receivePort);
+}
+
 Future<void> testParameterized(
   String description,
   Future<void> Function(dynamic) testCase,
@@ -45,6 +50,7 @@ void main() {
     late MockFileWrapper mockFileWrapper;
     late MockAudioFile mockAudioFile;
     late MockHapticService mockHapticService;
+    late MockHapticStreamAudioSourceBackground mockBackground;
 
     setUpAll(() {
       // Register fallback for potential complex types if necessary
@@ -62,12 +68,14 @@ void main() {
       mockFileWrapper = MockFileWrapper();
       mockAudioFile = MockAudioFile();
       mockHapticService = MockHapticService();
+      mockBackground = MockHapticStreamAudioSourceBackground();
 
       service = HapticAudioPlayerService(
         player: mockPlayer,
         lowPassFilterService: mockHapticFilter,
         fileWrapper: mockFileWrapper,
         hapticService: mockHapticService,
+        processorFunction: mockBackground.runInBackground
       );
     });
 

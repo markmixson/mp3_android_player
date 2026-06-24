@@ -1,25 +1,27 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mp3_android_player/services/haptic_service_interface.dart';
 import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
 
 class MockFile extends Mock implements File {}
 
-class MockHapticService extends Mock implements HapticService {}
+class MockHapticStreamAudioSourceBackground extends Mock {
+  void runInBackground(List<int> list, ReceivePort receivePort);
+}
 
 void main() {
   group('LowPassStreamAudioSource', () {
     late MockFile mockFile;
-    late HapticService mockHapticService;
+    late MockHapticStreamAudioSourceBackground mockBackground;
     const String testContentType = 'audio/mpeg';
-    const Duration testDuration = Duration(milliseconds: 20);
 
     setUp(() {
       mockFile = MockFile();
-      mockHapticService = MockHapticService();
+      mockBackground = MockHapticStreamAudioSourceBackground();
       registerFallbackValue(Duration(milliseconds: 20));
+      registerFallbackValue(ReceivePort());
     });
 
     group('request', () {
@@ -66,15 +68,20 @@ void main() {
           when(() => mockFile.openRead(any(), any())).thenAnswer(
             (_) => Stream.value(List.filled(10, 0)).asBroadcastStream(),
           );
-          when(
-            () =>
-                mockHapticService.playHapticPattern(List.filled(10, 0), any()),
-          ).thenAnswer((_) async => 12345);
+          when(() => mockBackground.runInBackground(any(), any())).thenAnswer((
+            invocation,
+          ) async {
+            final list = invocation.positionalArguments[0] as List<int>;
+            final receivePort =
+                invocation.positionalArguments[1] as ReceivePort;
+            Isolate.spawn((mainSendPort) {
+              mainSendPort.send(list);
+            }, receivePort.sendPort);
+          });
           final source = HapticStreamAudioSource(
             mockFile,
             testContentType,
-            mockHapticService,
-            testDuration,
+            mockBackground.runInBackground,
           );
 
           final response = await source.request(start, end);

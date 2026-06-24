@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/wrappers/file_wrapper.dart';
@@ -13,17 +15,21 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   final FileWrapper _fileWrapper;
   final HapticService _hapticService;
   static const String defaultType = 'audio/matroska';
-  static const Duration sampleWindowSize = Duration(milliseconds: 20);
+    final void Function(List<int> list, ReceivePort receivePort) _processorFunction;
+
 
   HapticAudioPlayerService({
     required super.player,
     required LowPassFilterService lowPassFilterService,
     required FileWrapper fileWrapper,
     required HapticService hapticService,
+    required void Function(List<int> list, ReceivePort receivePort) processorFunction,
+    
   }) : _player = player,
        _lowPassFilterService = lowPassFilterService,
        _fileWrapper = fileWrapper,
-       _hapticService = hapticService;
+       _hapticService = hapticService,
+       _processorFunction = processorFunction;
 
   @override
   void pause() {
@@ -46,8 +52,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
       final source = HapticStreamAudioSource(
         file,
         defaultType,
-        _hapticService,
-        sampleWindowSize,
+        _processorFunction
       );
       await _player.setAudioSource(source);
       debugPrint(
