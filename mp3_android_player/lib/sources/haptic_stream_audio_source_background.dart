@@ -1,5 +1,8 @@
 import 'dart:isolate';
+import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:mp3_android_player/processors/haptic_pcm_processor.dart';
 import 'package:mp3_android_player/services/default_haptic_service.dart';
 import 'package:mp3_android_player/services/haptic_service_interface.dart';
@@ -16,13 +19,27 @@ class HapticStreamAudioSourceBackground {
     ),
   );
 
+  static final RootIsolateToken? rootToken = RootIsolateToken.instance;
+
   static void runInBackground(
     final List<int> list,
     final ReceivePort receivePort,
   ) async {
+    initialize();
     Isolate.spawn((mainSendPort) async {
-      await hapticService.playHapticPattern(list, sampleWindowSize.inMilliseconds);
+      await hapticService.playHapticPattern(
+        list,
+        sampleWindowSize.inMilliseconds,
+      );
       mainSendPort.send(list);
     }, receivePort.sendPort);
+  }
+
+  static void initialize() {
+    if (rootToken == null) {
+      debugPrint("can't get root token!");
+    } else {
+      BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken!);
+    }
   }
 }
