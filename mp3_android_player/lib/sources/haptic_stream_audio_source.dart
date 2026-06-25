@@ -18,7 +18,7 @@ class HapticStreamAudioSource extends StreamAudioSource {
   static Future<HapticStreamAudioSource> create(
     final File file,
     final String contentType,
-    final Future<SendPort> Function(ReceivePort, RootIsolateToken?)
+    final Future<SendPort> Function(ReceivePort)
     processorFunction,
     final HapticMode initialHapticMode,
     final RootIsolateToken? rootToken,
@@ -27,8 +27,9 @@ class HapticStreamAudioSource extends StreamAudioSource {
     source._file = file;
     source._contentType = contentType;
     source._receivePort = ReceivePort();
-    source._sendPort = await processorFunction(source._receivePort, rootToken);
+    source._sendPort = await processorFunction(source._receivePort);
     source.setHapticMode(initialHapticMode);
+    source._sendPort.send(rootToken);
     return source;
   }
 

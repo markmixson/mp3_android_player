@@ -61,6 +61,7 @@ void main() {
     test('consumerIsolate handles messages correctly', () async {
       final receivePort = ReceivePort();
       final Completer completer = Completer();
+      const RootIsolateToken? token = null;
 
       Isolate.spawn(
         HapticStreamAudioSourceBackground.consumerIsolate,
@@ -73,6 +74,7 @@ void main() {
           sendPort.send(true);
           sendPort.send([1, 2]);
           sendPort.send(123456);
+          sendPort.send(token);
           sendPort.send('done');
         } else if (data is String) {
           completer.complete();
@@ -83,12 +85,11 @@ void main() {
       subscription.cancel();
     });
 
-    test('runInBackground handles null rootToken', () async {
+    test('do runInBackground', () async {
       final receivePort = ReceivePort();
 
       final sendPort = await HapticStreamAudioSourceBackground.runInBackground(
         receivePort,
-        null,
       );
 
       sendPort.send('done');

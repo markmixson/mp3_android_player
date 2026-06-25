@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:ui';
 
 import 'package:ffmpeg_kit_audio_flutter/ffmpeg_session.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,7 +29,7 @@ class MockAudioSource extends Mock implements AudioSource {}
 class MockHapticService extends Mock implements HapticService {}
 
 class MockHapticStreamAudioSourceBackground extends Mock {
-  Future<SendPort> runInBackground(ReceivePort receivePort, RootIsolateToken? rootToken);
+  Future<SendPort> runInBackground(ReceivePort receivePort);
 }
 
 class MockHapticStreamAudioSource extends Mock implements HapticStreamAudioSource {}
@@ -113,7 +112,7 @@ void main() {
           when(
             () => mockHapticService.stopHaptics(),
           ).thenAnswer((_) async => {});
-          when(() => mockBackground.runInBackground(any(), any())).thenAnswer((_) async => MockSendPort());
+          when(() => mockBackground.runInBackground(any())).thenAnswer((_) async => MockSendPort());
 
           await service.initialize(mockAudioFile);
           await service.play(mockAudioFile);

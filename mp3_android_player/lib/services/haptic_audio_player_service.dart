@@ -17,21 +17,14 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   final FileWrapper _fileWrapper;
   final HapticService _hapticService;
   static const String defaultType = 'audio/matroska';
-  final Future<SendPort> Function(
-    ReceivePort receivePort,
-    RootIsolateToken? rootToken,
-  )
-  _processorFunction;
+  final Future<SendPort> Function(ReceivePort receivePort) _processorFunction;
 
   HapticAudioPlayerService({
     required super.player,
     required LowPassFilterService lowPassFilterService,
     required FileWrapper fileWrapper,
     required HapticService hapticService,
-    required Future<SendPort> Function(
-      ReceivePort receivePort,
-      RootIsolateToken? rootToken,
-    )
+    required Future<SendPort> Function(ReceivePort receivePort)
     processorFunction,
   }) : _player = player,
        _lowPassFilterService = lowPassFilterService,

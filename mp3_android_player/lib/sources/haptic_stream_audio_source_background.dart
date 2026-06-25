@@ -52,6 +52,8 @@ class HapticStreamAudioSourceBackground {
         await subscription.cancel();
       } else if (message is bool) {
         skip = message;
+      } else if (message is RootIsolateToken?) {
+        ensureInitialized(message);
       } else {
         debugPrint("got unknown message: $message");
       }
@@ -65,22 +67,17 @@ class HapticStreamAudioSourceBackground {
     final bool skip,
   ) async {
     if (hapticMode == HapticMode.enabled) {
-      await hapticService.playHapticPattern(
-        list,
-        sampleWindowSize.inMilliseconds,
-        skip,
-      );
+      await hapticService
+          .playHapticPattern(list, sampleWindowSize.inMilliseconds, skip)
+          .then((count) async {
+            final millis = sampleWindowSize.inMilliseconds * count;
+            debugPrint("played $count amplitudes over $millis ms");
+            await doSleep(millis, skip);
+          });
     }
-    final int millis = list.length * sampleWindowSize.inMilliseconds;
-    await doSleep(millis, skip);
-    debugPrint("played ${list.length} amplitudes over $millis ms");
   }
 
-  static Future<SendPort> runInBackground(
-    final ReceivePort receivePort,
-    final RootIsolateToken? rootToken,
-  ) async {
-    ensureInitialized(rootToken);
+  static Future<SendPort> runInBackground(final ReceivePort receivePort) async {
     Isolate.spawn(consumerIsolate, receivePort.sendPort);
     final SendPort sendPort = await receivePort.first;
     return sendPort;

@@ -10,10 +10,7 @@ import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
 class MockFile extends Mock implements File {}
 
 class MockHapticStreamAudioSourceBackground extends Mock {
-  Future<SendPort> runInBackground(
-    ReceivePort receivePort,
-    RootIsolateToken? rootToken,
-  );
+  Future<SendPort> runInBackground(ReceivePort receivePort);
 }
 
 class MockRootIsolateToken extends Mock implements RootIsolateToken {}
@@ -39,7 +36,7 @@ void main() {
       test('called', () async {
         final sendPort = MockSendPort();
         when(
-          () => mockBackground.runInBackground(any(), any()),
+          () => mockBackground.runInBackground(any()),
         ).thenAnswer((_) async => sendPort);
         final source = await HapticStreamAudioSource.create(
           mockFile,
@@ -127,7 +124,7 @@ void main() {
             (_) => Stream.value(List.filled(10, 0)).asBroadcastStream(),
           );
           when(
-            () => mockBackground.runInBackground(any(), any()),
+            () => mockBackground.runInBackground(any()),
           ).thenAnswer((_) async => MockSendPort());
           final source = await HapticStreamAudioSource.create(
             mockFile,
