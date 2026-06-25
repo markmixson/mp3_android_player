@@ -10,14 +10,15 @@ import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
 class MockFile extends Mock implements File {}
 
 class MockHapticStreamAudioSourceBackground extends Mock {
-  void runInBackground(
-    List<int> list,
+  Future<SendPort> runInBackground(
     ReceivePort receivePort,
     RootIsolateToken? rootToken,
   );
 }
 
 class MockRootIsolateToken extends Mock implements RootIsolateToken {}
+
+class MockSendPort extends Mock implements SendPort {}
 
 void main() {
   group('LowPassStreamAudioSource', () {
@@ -32,6 +33,24 @@ void main() {
       mockRootIsolateToken = MockRootIsolateToken();
       registerFallbackValue(Duration(milliseconds: 20));
       registerFallbackValue(ReceivePort());
+    });
+
+    group('dispose', () {
+      test('called', () async {
+        final sendPort = MockSendPort();
+        when(
+          () => mockBackground.runInBackground(any(), any()),
+        ).thenAnswer((_) async => sendPort);
+        final source = await HapticStreamAudioSource.create(
+          mockFile,
+          testContentType,
+          mockBackground.runInBackground,
+          HapticMode.enabled,
+          mockRootIsolateToken,
+        );
+        source.dispose();
+        verify(() => sendPort.send("done")).called(1);
+      });
     });
 
     group('request', () {
@@ -108,16 +127,9 @@ void main() {
             (_) => Stream.value(List.filled(10, 0)).asBroadcastStream(),
           );
           when(
-            () => mockBackground.runInBackground(any(), any(), any()),
-          ).thenAnswer((invocation) async {
-            final list = invocation.positionalArguments[0] as List<int>;
-            final receivePort =
-                invocation.positionalArguments[1] as ReceivePort;
-            Isolate.spawn((mainSendPort) {
-              mainSendPort.send(list);
-            }, receivePort.sendPort);
-          });
-          final source = HapticStreamAudioSource(
+            () => mockBackground.runInBackground(any(), any()),
+          ).thenAnswer((_) async => MockSendPort());
+          final source = await HapticStreamAudioSource.create(
             mockFile,
             testContentType,
             mockBackground.runInBackground,
@@ -135,16 +147,6 @@ void main() {
             },
           );
           await response.stream.drain();
-
-          if (hapticModeEnabled) {
-            verify(
-              () => mockBackground.runInBackground(any(), any(), any()),
-            ).called(1);
-          } else {
-            verifyNever(
-              () => mockBackground.runInBackground(any(), any(), any()),
-            );
-          }
 
           expect(response.sourceLength, equals(fileLength.toDouble()));
           expect(response.contentLength, equals(expectedContentLength));

@@ -44,7 +44,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
 
   static void updateLowPassAudioSource(final ja.AudioSource? audioSource, final HapticMode mode) {
     if (audioSource is HapticStreamAudioSource) {
-      audioSource.hapticMode = mode;
+      audioSource.setHapticMode(mode);
     }
   }
 

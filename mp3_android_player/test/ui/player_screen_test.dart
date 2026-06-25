@@ -248,7 +248,7 @@ void main() {
 
       verify(() => audioService.pause()).called(1);
       verify(
-        () => hapticStreamAudioSource.hapticMode = HapticMode.enabled,
+        () => hapticStreamAudioSource.setHapticMode(HapticMode.enabled),
       ).called(1);
 
       await tester.pumpAndSettle();
@@ -262,7 +262,7 @@ void main() {
 
       verify(() => hapticAudioService.pause()).called(1);
       verify(
-        () => hapticStreamAudioSource.hapticMode = HapticMode.disabled,
+        () => hapticStreamAudioSource.setHapticMode(HapticMode.disabled),
       ).called(1);
     });
 

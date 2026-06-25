@@ -8,24 +8,29 @@ import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HapticStreamAudioSource extends StreamAudioSource {
-  final File _file;
-  final String _contentType;
-  final void Function(
-    List<int> list,
-    ReceivePort receivePort,
-    RootIsolateToken? rootToken,
-  )
-  _processorFunction;
-  HapticMode hapticMode;
-  final RootIsolateToken? _rootToken;
+  late File _file;
+  late String _contentType;
+  late ReceivePort _receivePort;
+  late SendPort _sendPort;
 
-  HapticStreamAudioSource(
-    this._file,
-    this._contentType,
-    this._processorFunction,
-    this.hapticMode,
-    this._rootToken,
-  );
+  HapticStreamAudioSource._();
+
+  static Future<HapticStreamAudioSource> create(
+    final File file,
+    final String contentType,
+    final Future<SendPort> Function(ReceivePort, RootIsolateToken?)
+    processorFunction,
+    final HapticMode initialHapticMode,
+    final RootIsolateToken? rootToken,
+  ) async {
+    final source = HapticStreamAudioSource._();
+    source._file = file;
+    source._contentType = contentType;
+    source._receivePort = ReceivePort();
+    source._sendPort = await processorFunction(source._receivePort, rootToken);
+    source.setHapticMode(initialHapticMode);
+    return source;
+  }
 
   @override
   Future<StreamAudioResponse> request([
@@ -36,43 +41,39 @@ class HapticStreamAudioSource extends StreamAudioSource {
     final length = await _file.length();
     final myEnd = end ?? length;
     final audioSubject = PublishSubject<List<int>>();
-    final receivePort = getReceivePort(audioSubject);
     return StreamAudioResponse(
       sourceLength: length,
       contentLength: myEnd - myStart,
       offset: myStart,
       stream: audioSubject.stream.doOnListen(
-        () async => startRead(start, end, receivePort),
+        () async => _startRead(start, end, audioSubject),
       ),
       contentType: _contentType,
     );
   }
 
-  void startRead(
+  void setHapticMode(final HapticMode hapticMode) {
+    _sendPort.send(hapticMode);
+  }
+
+  void _startRead(
     final int? start,
     final int? end,
-    final ReceivePort receivePort,
+    final PublishSubject<List<int>> audioSubject,
   ) async {
     await _file
         .openRead(start, end)
-        .doOnDone(() async => receivePort.sendPort.send('done'))
-        .forEach(
-          (list) => hapticMode == HapticMode.enabled
-              ? _processorFunction(list, receivePort, _rootToken)
-              : receivePort.sendPort.send(list),
-        );
+        .doOnDone(() async {
+          audioSubject.close();
+        })
+        .forEach((list) async {
+          _sendPort.send(list);
+          audioSubject.add(list);
+        });
   }
 
-  ReceivePort getReceivePort(final PublishSubject<List<int>> audioSubject) {
-    final receivePort = ReceivePort();
-    receivePort.listen((message) {
-      if (message is List<int>) {
-        audioSubject.add(message);
-      } else {
-        audioSubject.close();
-        receivePort.close();
-      }
-    });
-    return receivePort;
+  void dispose() {
+    _sendPort.send('done');
+    _receivePort.close();
   }
 }

@@ -30,8 +30,12 @@ class MockAudioSource extends Mock implements AudioSource {}
 class MockHapticService extends Mock implements HapticService {}
 
 class MockHapticStreamAudioSourceBackground extends Mock {
-  void runInBackground(List<int> list, ReceivePort receivePort, RootIsolateToken? rootToken);
+  Future<SendPort> runInBackground(ReceivePort receivePort, RootIsolateToken? rootToken);
 }
+
+class MockHapticStreamAudioSource extends Mock implements HapticStreamAudioSource {}
+
+class MockSendPort extends Mock implements SendPort {}
 
 Future<void> testParameterized(
   String description,
@@ -52,6 +56,7 @@ void main() {
     late MockAudioFile mockAudioFile;
     late MockHapticService mockHapticService;
     late MockHapticStreamAudioSourceBackground mockBackground;
+    late MockHapticStreamAudioSource mockHapticStreamAudioSource;
 
     setUpAll(() {
       // Register fallback for potential complex types if necessary
@@ -60,7 +65,7 @@ void main() {
       registerFallbackValue(MockAudioSource());
       registerFallbackValue(List.empty());
       registerFallbackValue(Duration(milliseconds: 0));
-      registerFallbackValue(0.0);
+      registerFallbackValue(ReceivePort());
     });
 
     setUp(() {
@@ -70,6 +75,7 @@ void main() {
       mockAudioFile = MockAudioFile();
       mockHapticService = MockHapticService();
       mockBackground = MockHapticStreamAudioSourceBackground();
+      mockHapticStreamAudioSource = MockHapticStreamAudioSource();
 
       service = HapticAudioPlayerService(
         player: mockPlayer,
@@ -97,6 +103,7 @@ void main() {
           when(
             () => mockPlayer.setAudioSource(any()),
           ).thenAnswer((_) async => null);
+          when(() => mockPlayer.audioSource).thenReturn(mockHapticStreamAudioSource);
           when(() => mockPlayer.play()).thenAnswer((_) async => {});
           when(
             () => mockHapticService.playHapticPattern(any(), any()),
@@ -106,6 +113,7 @@ void main() {
           when(
             () => mockHapticService.stopHaptics(),
           ).thenAnswer((_) async => {});
+          when(() => mockBackground.runInBackground(any(), any())).thenAnswer((_) async => MockSendPort());
 
           await service.initialize(mockAudioFile);
           await service.play(mockAudioFile);
@@ -135,6 +143,7 @@ void main() {
           verify(() => mockPlayer.stop()).called(1);
           verify(() => mockPlayer.pause()).called(1);
           verify(() => mockHapticService.stopHaptics()).called(2);
+          verify(() => mockHapticStreamAudioSource.dispose()).called(1);
         },
         [
           {'path': 'song.mp3'},
@@ -142,7 +151,7 @@ void main() {
         ],
       );
 
-      test('should rethrow error when setup fails (branch coverage)', () async {
+      test('should rethrow error when setup fails', () async {
         // Arrange
         when(() => mockAudioFile.path).thenReturn('error.mp3');
         when(

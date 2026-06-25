@@ -17,8 +17,9 @@ class DefaultHapticService implements HapticService {
   Future<int> playHapticPattern(
     List<int> pattern,
     final int sampleWindowDurationMillis,
+    [final bool skip = false]
   ) async {
-    if (pattern.isNotEmpty) {
+    if (pattern.isNotEmpty && !skip) {
       final amplitudes = _processor.processPcmData(pattern);
       try {
         await _hapticsWrapper.playWaveform(

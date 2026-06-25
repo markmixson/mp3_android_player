@@ -4,6 +4,7 @@ abstract class HapticService {
   Future<int> playHapticPattern(
     List<int> pattern,
     int sampleWindowDurationMillis,
+    [bool skip = false]
   ) async => throw UnimplementedError();
 
   /// Stops any ongoing haptic playback.

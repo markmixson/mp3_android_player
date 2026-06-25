@@ -17,7 +17,10 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   final FileWrapper _fileWrapper;
   final HapticService _hapticService;
   static const String defaultType = 'audio/matroska';
-  final void Function(List<int> list, ReceivePort receivePort, RootIsolateToken? rootToken)
+  final Future<SendPort> Function(
+    ReceivePort receivePort,
+    RootIsolateToken? rootToken,
+  )
   _processorFunction;
 
   HapticAudioPlayerService({
@@ -25,7 +28,10 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
     required LowPassFilterService lowPassFilterService,
     required FileWrapper fileWrapper,
     required HapticService hapticService,
-    required void Function(List<int> list, ReceivePort receivePort, RootIsolateToken? rootToken)
+    required Future<SendPort> Function(
+      ReceivePort receivePort,
+      RootIsolateToken? rootToken,
+    )
     processorFunction,
   }) : _player = player,
        _lowPassFilterService = lowPassFilterService,
@@ -55,12 +61,16 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
       processedPath,
     ) async {
       final file = _fileWrapper.getFile(processedPath);
-      final source = HapticStreamAudioSource(
+      if (_player.audioSource is HapticStreamAudioSource) {
+        final source = _player.audioSource! as HapticStreamAudioSource;
+        source.dispose();
+      }
+      final source = await HapticStreamAudioSource.create(
         file,
         defaultType,
         _processorFunction,
         hapticMode ?? HapticMode.disabled,
-        rootToken
+        rootToken,
       );
       await _player.setAudioSource(source);
       debugPrint(

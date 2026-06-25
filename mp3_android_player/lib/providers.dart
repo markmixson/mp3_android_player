@@ -1,9 +1,8 @@
 import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:mp3_android_player/processors/haptic_pcm_processor.dart';
+import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
 import 'package:mp3_android_player/sources/haptic_stream_audio_source_background.dart';
-import 'package:mp3_android_player/wrappers/advanced_haptics_wrapper.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_helper.dart';
 import 'package:mp3_android_player/wrappers/ffmpeg_wrapper.dart';
 import 'package:mp3_android_player/wrappers/file_wrapper.dart';
@@ -14,7 +13,6 @@ import 'package:mp3_android_player/services/audio_player_service_interface.dart'
 import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
 import 'package:mp3_android_player/services/default_audio_file_picker_service.dart';
 import 'package:mp3_android_player/services/default_audio_player_service.dart';
-import 'package:mp3_android_player/services/default_haptic_service.dart';
 import 'package:mp3_android_player/services/default_low_pass_filter_service.dart';
 import 'package:mp3_android_player/services/default_preference_service.dart';
 import 'package:mp3_android_player/services/haptic_service_interface.dart';
@@ -60,13 +58,7 @@ final defaultAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
 
 /// Default Provider for the [HapticService].
 final hapticServiceProvider = Provider<HapticService>((ref) {
-  final hapticService = DefaultHapticService(
-    hapticsWrapper: AdvancedHapticsWrapper(),
-    processor: HapticPCMProcessor(
-      sampleRate: 44100,
-      windowDuration: Duration(milliseconds: 20),
-    ),
-  );
+  final hapticService = HapticStreamAudioSourceBackground.hapticService;
   ref.onDispose(() {
     hapticService.stopHaptics();
   });
@@ -80,6 +72,10 @@ final hapticAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
   final audioPlayer = AudioPlayer();
   ref.onDispose(() {
     audioPlayer.dispose();
+    if (audioPlayer.audioSource is HapticStreamAudioSource) {
+      final source = audioPlayer.audioSource! as HapticStreamAudioSource;
+      source.dispose();
+    }
   });
   return HapticAudioPlayerService(
     player: audioPlayer,
