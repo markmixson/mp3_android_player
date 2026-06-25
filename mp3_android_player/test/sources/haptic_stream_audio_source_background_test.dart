@@ -17,7 +17,6 @@ void main() {
 
   setUp(() {
     mockHapticService = MockHapticService();
-    HapticStreamAudioSourceBackground.ensureInitialized = (token) {};
     HapticStreamAudioSourceBackground.hapticService = mockHapticService;
   });
 
@@ -90,18 +89,6 @@ void main() {
       final sendPort = await HapticStreamAudioSourceBackground.runInBackground(
         receivePort,
         null,
-      );
-
-      sendPort.send('done');
-      receivePort.close();
-    });
-
-    test('runInBackground handles nonnull rootToken', () async {
-      final receivePort = ReceivePort();
-
-      final sendPort = await HapticStreamAudioSourceBackground.runInBackground(
-        receivePort,
-        MockRootIsolateToken(),
       );
 
       sendPort.send('done');

@@ -21,9 +21,13 @@ class HapticStreamAudioSourceBackground {
     ),
   );
 
-  static void Function(RootIsolateToken) ensureInitialized = (rootToken) {
-    BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
-  };
+  static void ensureInitialized(final RootIsolateToken? rootToken) {
+    if (rootToken == null) {
+      debugPrint("can't get root token!");
+    } else {
+      BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
+    }
+  }
 
   static Future<void> Function(int, bool) doSleep = (millis, skip) async {
     if (!skip) {
@@ -76,11 +80,7 @@ class HapticStreamAudioSourceBackground {
     final ReceivePort receivePort,
     final RootIsolateToken? rootToken,
   ) async {
-    if (rootToken == null) {
-      debugPrint("can't get root token!");
-    } else {
-      ensureInitialized(rootToken);
-    }
+    ensureInitialized(rootToken);
     Isolate.spawn(consumerIsolate, receivePort.sendPort);
     final SendPort sendPort = await receivePort.first;
     return sendPort;
