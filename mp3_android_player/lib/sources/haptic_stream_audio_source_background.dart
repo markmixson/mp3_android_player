@@ -67,7 +67,9 @@ class HapticStreamAudioSourceBackground {
         skip,
       );
     }
-    await doSleep(list.length * sampleWindowSize.inMilliseconds, skip);
+    final int millis = list.length * sampleWindowSize.inMilliseconds;
+    await doSleep(millis, skip);
+    debugPrint("played ${list.length} amplitudes over $millis ms");
   }
 
   static Future<SendPort> runInBackground(
