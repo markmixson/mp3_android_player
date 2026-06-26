@@ -58,6 +58,9 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
         final source = _player.audioSource! as HapticStreamAudioSource;
         source.dispose();
       }
+      debugPrint(
+        "creating hapticStreamAudioSource with file ${file.path}, type $defaultType, hapticMode $hapticMode, and token $rootToken",
+      );
       final source = await HapticStreamAudioSource.create(
         file,
         defaultType,
@@ -65,6 +68,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
         hapticMode ?? HapticMode.disabled,
         rootToken,
       );
+      debugPrint("setting audio source");
       await _player.setAudioSource(source);
       debugPrint(
         "player source initialized for $processedPath, $file of type $defaultType",

@@ -58,6 +58,7 @@ class DefaultAudioPlayerService implements AudioPlayerService {
     final RootIsolateToken? rootToken,
     final HapticMode? hapticMode,
   ]) async {
+    debugPrint("setting file path to ${audioFile.path}");
     return _player.setFilePath(audioFile.path);
   }
   

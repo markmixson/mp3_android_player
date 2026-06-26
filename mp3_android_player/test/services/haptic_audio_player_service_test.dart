@@ -56,6 +56,7 @@ void main() {
     late MockHapticService mockHapticService;
     late MockHapticStreamAudioSourceBackground mockBackground;
     late MockHapticStreamAudioSource mockHapticStreamAudioSource;
+    late MockFile mockFile;
 
     setUpAll(() {
       // Register fallback for potential complex types if necessary
@@ -75,6 +76,7 @@ void main() {
       mockHapticService = MockHapticService();
       mockBackground = MockHapticStreamAudioSourceBackground();
       mockHapticStreamAudioSource = MockHapticStreamAudioSource();
+      mockFile = MockFile();
 
       service = HapticAudioPlayerService(
         player: mockPlayer,
@@ -95,10 +97,11 @@ void main() {
           final String hapticPath = 'haptic_1234.mp3';
 
           when(() => mockAudioFile.path).thenReturn(inputPath);
+          when(() => mockFile.path).thenReturn(hapticPath);
           when(
             () => mockHapticFilter.applyLowPassFilter(any(), any()),
           ).thenAnswer((_) async => processedPath);
-          when(() => mockFileWrapper.getFile(any())).thenReturn(MockFile());
+          when(() => mockFileWrapper.getFile(any())).thenReturn(mockFile);
           when(
             () => mockPlayer.setAudioSource(any()),
           ).thenAnswer((_) async => null);
