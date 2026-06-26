@@ -151,9 +151,9 @@ void main() {
           verify(() => mockPlayer.stop()).called(1);
           verify(() => mockPlayer.pause()).called(1);
           verify(() => mockPlayer.seek(seekDuration)).called(1);
-          verify(() => mockHapticService.stopHaptics()).called(4);
-          verify(() => mockHapticStreamAudioSource.stop()).called(4);
-          verify(() => mockHapticStreamAudioSource.go()).called(2);
+          verify(() => mockHapticService.stopHaptics()).called(3);
+          verify(() => mockHapticStreamAudioSource.stop()).called(3);
+          verify(() => mockHapticStreamAudioSource.go()).called(1);
         },
         [
           {'path': 'song.mp3'},

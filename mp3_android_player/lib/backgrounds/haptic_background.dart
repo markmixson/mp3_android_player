@@ -37,6 +37,9 @@ class HapticBackground {
     await for (final pcmData in context.controller.stream) {
       context.cancelableOperation = CancelableOperation.fromFuture(
         processor.processPcmData(pcmData).then((amplitudes) async {
+          debugPrint(
+            "processed ${pcmData.length / 2} pcm 16-bit samples and generated ${amplitudes.length} amplitudes",
+          );
           return hapticService
               .playHapticPattern(
                 amplitudes,

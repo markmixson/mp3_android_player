@@ -39,13 +39,6 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
   }
 
   @override
-  Future<void> seek(final Duration position) async {
-    stopHapticAudioSource();
-    await super.seek(position);
-    startHapticAudioSource();
-  }
-
-  @override
   void pause() {
     stopHapticAudioSource();
     super.pause();

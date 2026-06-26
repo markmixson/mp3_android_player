@@ -34,9 +34,9 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     }
     final currentPosition = state.position;
     state = state.copyWith(hapticMode: mode);
+    updateLowPassAudioSource(_lowPassAudioPlayerService.audioSource, mode);
     await preferenceService.setHapticMode(mode);
     await currentAudioPlayerService.seek(currentPosition);
-    updateLowPassAudioSource(_lowPassAudioPlayerService.audioSource, mode);
     if (state.status == PlaybackStatus.playing) {
       resumeOrPlay();
     }
