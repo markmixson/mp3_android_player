@@ -16,7 +16,6 @@ class AdvancedHapticsWrapper {
     } catch (e) {
       debugPrint("can't play haptics due to error! $e");
     }
-    
   }
 
   Future<void> stop() async {
