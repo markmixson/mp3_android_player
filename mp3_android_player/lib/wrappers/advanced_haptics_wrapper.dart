@@ -11,7 +11,12 @@ class AdvancedHapticsWrapper {
     final List<int> timings,
     final List<int> amplitudes,
   ) async {
-    await AdvancedHaptics.playWaveform(timings, amplitudes);
+    try {
+      await AdvancedHaptics.playWaveform(timings, amplitudes);
+    } catch (e) {
+      debugPrint("can't play haptics due to error! $e");
+    }
+    
   }
 
   Future<void> stop() async {
