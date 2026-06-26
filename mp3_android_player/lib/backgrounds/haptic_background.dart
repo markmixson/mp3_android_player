@@ -55,6 +55,9 @@ class HapticBackground {
         }),
       );
       await context.cancelableOperation?.value;
+      if (context.cancelableOperation!.isCanceled) {
+        break;
+      }
     }
   }
 
