@@ -10,9 +10,7 @@ class EnsureInitializedWrapper {
     } else {
       BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
       final hasSupport = await wrapper.hasCustomHapticsSupport();
-      if (!hasSupport) {
-        debugPrint("no custom haptics support!");
-      }
+      debugPrint("custom haptics support: $hasSupport");
     }
   }
 }

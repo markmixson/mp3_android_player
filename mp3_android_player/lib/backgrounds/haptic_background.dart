@@ -61,7 +61,7 @@ class HapticBackground {
         case HapticMode hapticMode:
           context.hapticMode = hapticMode;
         case RootIsolateToken? token:
-          EnsureInitializedWrapper.ensureInitialized(token, wrapper);
+          await EnsureInitializedWrapper.ensureInitialized(token, wrapper);
         case 'done':
           await context.dispose(sendPort, subscription);
         default:
