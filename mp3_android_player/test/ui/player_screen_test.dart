@@ -94,12 +94,16 @@ void main() {
     when(() => hapticAudioService.resume()).thenAnswer((_) async => {});
     when(() => hapticAudioService.play(any())).thenAnswer((_) async => {});
     when(() => hapticAudioService.seek(any())).thenAnswer((_) async {});
+    
     when(
       () => hapticAudioService.initialize(any(), any(), any()),
     ).thenAnswer((_) async {});
     when(
       () => hapticAudioService.audioSource,
     ).thenReturn(hapticStreamAudioSource);
+
+    when(() => hapticStreamAudioSource.go()).thenAnswer((_) async {});
+    when(() => hapticStreamAudioSource.setHapticMode(any())).thenAnswer((_) async {});
 
     when(() => audioService.hasAudioSource).thenReturn(true);
     when(() => hapticAudioService.hasAudioSource).thenReturn(true);

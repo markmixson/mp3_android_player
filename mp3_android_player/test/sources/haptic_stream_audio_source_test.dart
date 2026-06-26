@@ -69,7 +69,7 @@ void main() {
           'fileLength': 100,
           'expectedContentLength': 50,
           'expectedOffset': 0,
-          'description': 'partial file (start=0, end=50), haptic mode disabled',
+          'description': 'haptic mode disabled',
           'hapticModeEnabled': false,
           'rootTokenAvailable': true,
           'toggleHapticMode': false,
@@ -80,7 +80,7 @@ void main() {
           'fileLength': 100,
           'expectedContentLength': 50,
           'expectedOffset': 0,
-          'description': 'partial file (start=0, end=50), haptic mode toggled',
+          'description': 'haptic mode toggled',
           'hapticModeEnabled': false,
           'rootTokenAvailable': true,
           'toggleHapticMode': true,
@@ -103,7 +103,7 @@ void main() {
           'expectedContentLength': 50,
           'expectedOffset': 0,
           'description':
-              'partial file (start=0, end=50), no root token available',
+              'no root token available',
           'hapticModeEnabled': true,
           'rootTokenAvailable': false,
           'toggleHapticMode': false,
@@ -155,7 +155,7 @@ void main() {
 
           if (toggleHapticMode) {
             final expectedToggle = hapticModeEnabled ? HapticMode.disabled : HapticMode.enabled;
-            source.setHapticMode(expectedToggle);
+            await source.setHapticMode(expectedToggle);
             verify(() => mockSendPort.send(initialHapticMode)).called(1);
             verify(() => mockSendPort.send(expectedToggle)).called(1);
           } else {

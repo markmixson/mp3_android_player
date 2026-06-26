@@ -42,16 +42,19 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     }
   }
 
-  static void updateLowPassAudioSource(final ja.AudioSource? audioSource, final HapticMode mode) {
+  static void updateLowPassAudioSource(
+    final ja.AudioSource? audioSource,
+    final HapticMode mode,
+  ) async {
     if (audioSource is HapticStreamAudioSource) {
-      audioSource.setHapticMode(mode);
+      await audioSource.setHapticMode(mode);
     }
   }
 
   Future<void> pickAndPlayFile(
-    final PreferenceService prefs,
-    [final RootIsolateToken? rootToken]
-  ) async {
+    final PreferenceService prefs, [
+    final RootIsolateToken? rootToken,
+  ]) async {
     final file = await _audioFilePickerService.pickFile();
     if (file != null) {
       state = state.copyWith(

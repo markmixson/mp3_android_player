@@ -55,9 +55,10 @@ class HapticStreamAudioSource extends StreamAudioSource {
     );
   }
 
-  void setHapticMode(final HapticMode hapticMode) {
+  Future<void> setHapticMode(final HapticMode hapticMode) async {
     _hapticMode = hapticMode;
-    _sendPort.send(_hapticMode);
+    stop();
+    await go();
   }
 
   void _startRead(
