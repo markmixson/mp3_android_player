@@ -13,7 +13,9 @@ class HapticBackgroundContext {
   final ReceivePort receivePort = ReceivePort();
   final StreamController<List<int>> controller = StreamController<List<int>>();
   HapticMode hapticMode = HapticMode.disabled;
-  CancelableOperation? cancelableOperation;
+  CancelableOperation? pcmProcessing;
+  CancelableOperation? hapticPlaying;
+  CancelableOperation? delay;
 
   Future<void> dispose(
     final SendPort sendPort,
@@ -21,7 +23,9 @@ class HapticBackgroundContext {
   ) async {
     receivePort.close();
     await controller.close();
-    await cancelableOperation?.cancel();
+    await pcmProcessing?.cancel();
+    await hapticPlaying?.cancel();
+    await delay?.cancel();
     sendPort.send('done');
     await subscription.cancel();
   }

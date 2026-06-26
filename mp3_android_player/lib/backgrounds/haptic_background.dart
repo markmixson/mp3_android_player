@@ -35,27 +35,35 @@ class HapticBackground {
     final context = HapticBackgroundContext();
     _doSetup(context, mainSendPort);
     await for (final pcmData in context.controller.stream) {
-      context.cancelableOperation = CancelableOperation.fromFuture(
-        processor.processPcmData(pcmData).then((amplitudes) async {
-          debugPrint(
-            "processed ${pcmData.length / 2} pcm 16-bit samples and generated ${amplitudes.length} amplitudes",
-          );
-          return hapticService
-              .playHapticPattern(
-                amplitudes,
-                sampleWindowSize.inMilliseconds,
-                context.hapticMode == HapticMode.disabled,
-              )
-              .then((count) async {
-                final millis =
-                    sampleWindowSize.inMilliseconds * amplitudes.length;
-                debugPrint("haptics running $count amplitudes over $millis ms");
-                return Future.delayed(Duration(milliseconds: millis));
-              });
-        }),
+      context.pcmProcessing = CancelableOperation.fromFuture(
+        processor.processPcmData(pcmData),
       );
-      await context.cancelableOperation?.value;
-      if (context.cancelableOperation!.isCanceled) {
+      final List<int>? amplitudes = await context.pcmProcessing?.value;
+      if (context.pcmProcessing!.isCanceled) {
+        break;
+      }
+      debugPrint(
+        "processed ${pcmData.length / 2} pcm 16-bit samples and generated ${amplitudes!.length} amplitudes",
+      );
+      context.hapticPlaying = CancelableOperation.fromFuture(
+        hapticService.playHapticPattern(
+          amplitudes,
+          sampleWindowSize.inMilliseconds,
+          context.hapticMode == HapticMode.disabled,
+        ),
+      );
+      final int? count = await context.hapticPlaying?.value;
+      if (context.hapticPlaying!.isCanceled) {
+        break;
+      }
+      final millis = sampleWindowSize.inMilliseconds * amplitudes.length;
+      debugPrint("haptics running $count! amplitudes over $millis ms");
+
+      context.delay = CancelableOperation.fromFuture(
+        Future.delayed(Duration(milliseconds: millis)),
+      );
+      await context.delay?.value;
+      if (context.delay!.isCanceled) {
         break;
       }
     }
