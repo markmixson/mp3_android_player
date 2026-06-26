@@ -3,28 +3,28 @@ import 'package:mp3_android_player/processors/haptic_pcm_processor.dart';
 
 void main() {
   group('HapticPCMProcessor', () {
-    test('returns empty list when samplesPerWindow is 0 (zero duration)', () {
+    test('returns empty list when samplesPerWindow is 0 (zero duration)', () async {
       final processor = HapticPCMProcessor(
         sampleRate: 44100,
         windowDuration: Duration.zero,
       );
-      expect(processor.processPcmData([]), isEmpty);
+      expect(await processor.processPcmData([]), isEmpty);
     });
 
-    test('returns empty list when samplesPerWindow is 0 (zero sample rate)', () {
+    test('returns empty list when samplesPerWindow is 0 (zero sample rate)', () async {
       final processor = HapticPCMProcessor(
         sampleRate: 0,
         windowDuration: const Duration(milliseconds: 100),
       );
-      expect(processor.processPcmData([]), isEmpty);
+      expect(await processor.processPcmData([]), isEmpty);
     });
 
-    test('returns empty list when pcmData is empty', () {
+    test('returns empty list when pcmData is empty', () async {
       final processor = HapticPCMProcessor(
         sampleRate: 44100,
         windowDuration: const Duration(milliseconds: 10),
       );
-      expect(processor.processPcmData([]), isEmpty);
+      expect(await processor.processPcmData([]), isEmpty);
     });
 
     group('Parameterized Tests for processPcmData', () {
@@ -74,29 +74,29 @@ void main() {
       ];
 
       for (final testCase in testCases) {
-        test(testCase['name'] as String, () {
+        test(testCase['name'] as String, () async {
           final processor = HapticPCMProcessor(
             sampleRate: testCase['sampleRate'] as int,
             windowDuration: testCase['windowDuration'] as Duration,
           );
-          final result = processor.processPcmData(List<int>.from(testCase['pcmData'] as List));
+          final result = await processor.processPcmData(List<int>.from(testCase['pcmData'] as List));
           expect(result, equals(testCase['expected']));
         });
       }
     });
 
     group('Edge Cases for _getSumOfSquares logic', () {
-      test('Handles very large negative values (S=-32768)', () {
+      test('Handles very large negative values (S=-32768)', () async {
         final processor = HapticPCMProcessor(sampleRate: 100, windowDuration: const Duration(milliseconds: 20));
         // -32768 in hex is 0x8000. Little-endian: [0x00, 0x80] -> [0, 128]
-        final result = processor.processPcmData([0, 128]);
+        final result = await processor.processPcmData([0, 128]);
         expect(result[0], equals(255)); // sqrt((-32768)^2 / 1) is huge, clamped to 255
       });
 
-      test('Handles very large positive values (S=32767)', () {
+      test('Handles very large positive values (S=32767)', () async {
         final processor = HapticPCMProcessor(sampleRate: 100, windowDuration: const Duration(milliseconds: 20));
         // 32767 in hex is 0x7FFF. Little-endian: [0xFF, 0x7F] -> [255, 127]
-        final result = processor.processPcmData([255, 127]);
+        final result = await processor.processPcmData([255, 127]);
         expect(result[0], equals(255)); // sqrt(32767^2 / 1) is huge, clamped to 255
       });
     });

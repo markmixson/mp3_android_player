@@ -9,7 +9,7 @@ class HapticPCMProcessor {
   HapticPCMProcessor({required this.sampleRate, required this.windowDuration});
 
   /// Each sample represents the RMS amplitude for one [windowDuration] chunk.
-  List<int> processPcmData(final List<int> pcmData) {
+  Future<List<int>> processPcmData(final List<int> pcmData) async {
     final samplesPerWindow = (sampleRate * windowDuration.inMilliseconds / 1000)
         .round();
     if (samplesPerWindow <= 0) {
