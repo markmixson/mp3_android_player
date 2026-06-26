@@ -3,6 +3,10 @@ import 'package:flutter/rendering.dart';
 
 // coverage:ignore-file
 class AdvancedHapticsWrapper {
+  Future<bool> hasCustomHapticsSupport() {
+    return AdvancedHaptics.hasCustomHapticsSupport();
+  }
+
   Future<void> playWaveform(
     final List<int> timings,
     final List<int> amplitudes,

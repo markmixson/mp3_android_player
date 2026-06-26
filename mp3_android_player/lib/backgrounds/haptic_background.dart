@@ -18,8 +18,11 @@ class HapticBackground {
     sampleRate: 44100,
     windowDuration: sampleWindowSize,
   );
+
+  static final AdvancedHapticsWrapper wrapper = AdvancedHapticsWrapper();
+
   static final HapticService hapticService = DefaultHapticService(
-    hapticsWrapper: AdvancedHapticsWrapper(),
+    hapticsWrapper: wrapper,
   );
 
   static Future<SendPort> runInBackground(final ReceivePort receivePort) async {
@@ -58,7 +61,7 @@ class HapticBackground {
         case HapticMode hapticMode:
           context.hapticMode = hapticMode;
         case RootIsolateToken? token:
-          EnsureInitializedWrapper.ensureInitialized(token);
+          EnsureInitializedWrapper.ensureInitialized(token, wrapper);
         case 'done':
           await context.dispose(sendPort, subscription);
         default:
