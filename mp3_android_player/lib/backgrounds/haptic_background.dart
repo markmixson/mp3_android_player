@@ -36,14 +36,17 @@ class HapticBackground {
     _doSetup(context, mainSendPort);
     await for (final pcmData in context.controller.stream) {
       context.cancelableOperation = CancelableOperation.fromFuture(
-        Future.forEach(processor.processPcmData(pcmData), (amplitude) async {
-          await hapticService.playHapticPattern(
-            [amplitude],
-            sampleWindowSize.inMilliseconds,
-            context.hapticMode == HapticMode.disabled,
-          );
-          await Future.delayed(sampleWindowSize);
-        }),
+        hapticService
+            .playHapticPattern(
+              processor.processPcmData(pcmData),
+              sampleWindowSize.inMilliseconds,
+              context.hapticMode == HapticMode.disabled,
+            )
+            .then((count) async {
+              final millis = sampleWindowSize.inMilliseconds * count;
+              debugPrint("played $count amplitudes over $millis ms");
+              await Future.delayed(Duration(milliseconds: millis));
+            }),
       );
       await context.cancelableOperation?.value;
     }

@@ -112,14 +112,20 @@ void main() {
           ).thenAnswer((_) async => 12345);
           when(() => mockPlayer.stop()).thenAnswer((_) async => {});
           when(() => mockPlayer.pause()).thenAnswer((_) async => {});
+          
+          when(() => mockPlayer.seek(any())).thenAnswer((_) async => {});
           when(
             () => mockHapticService.stopHaptics(),
           ).thenAnswer((_) async => {});
           when(() => mockBackground.runInBackground(any())).thenAnswer((_) async => MockSendPort());
+          when(() => mockHapticStreamAudioSource.go()).thenAnswer((_) async => {});
 
+          final seekDuration = Duration(seconds: 5);
           await service.initialize(mockAudioFile);
           await service.play(mockAudioFile);
           service.pause();
+          service.resume();
+          service.seek(seekDuration);
           service.stop();
 
           final Function(String) captured =
@@ -141,11 +147,13 @@ void main() {
             ),
           ).called(1);
 
-          verify(() => mockPlayer.play()).called(1);
+          verify(() => mockPlayer.play()).called(2);
           verify(() => mockPlayer.stop()).called(1);
           verify(() => mockPlayer.pause()).called(1);
-          verify(() => mockHapticService.stopHaptics()).called(2);
-          verify(() => mockHapticStreamAudioSource.dispose()).called(1);
+          verify(() => mockPlayer.seek(seekDuration)).called(1);
+          verify(() => mockHapticService.stopHaptics()).called(4);
+          verify(() => mockHapticStreamAudioSource.stop()).called(4);
+          verify(() => mockHapticStreamAudioSource.go()).called(2);
         },
         [
           {'path': 'song.mp3'},

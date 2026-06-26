@@ -33,14 +33,27 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
        _processorFunction = processorFunction;
 
   @override
+  void resume() {
+    startHapticAudioSource();
+    super.resume();
+  }
+
+  @override
+  Future<void> seek(final Duration position) async {
+    stopHapticAudioSource();
+    await super.seek(position);
+    startHapticAudioSource();
+  }
+
+  @override
   void pause() {
-    _hapticService.stopHaptics();
+    stopHapticAudioSource();
     super.pause();
   }
 
   @override
   void stop() async {
-    _hapticService.stopHaptics();
+    stopHapticAudioSource();
     super.stop();
   }
 
@@ -54,10 +67,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
       processedPath,
     ) async {
       final file = _fileWrapper.getFile(processedPath);
-      if (_player.audioSource is HapticStreamAudioSource) {
-        final source = _player.audioSource! as HapticStreamAudioSource;
-        source.dispose();
-      }
+      stopHapticAudioSource();
       debugPrint(
         "creating hapticStreamAudioSource with file ${file.path}, type $defaultType, hapticMode $hapticMode, and token $rootToken",
       );
@@ -75,5 +85,25 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
       );
       return processedPath;
     }));
+  }
+
+  void runIfHapticAudioSource(void Function(HapticStreamAudioSource) toRun) {
+    if (_player.audioSource is HapticStreamAudioSource) {
+      final source = _player.audioSource! as HapticStreamAudioSource;
+      toRun.call(source);
+    }
+  }
+
+  void stopHapticAudioSource() {
+    runIfHapticAudioSource((source) async {
+      source.stop();
+      await _hapticService.stopHaptics();
+    });
+  }
+
+  void startHapticAudioSource() {
+    runIfHapticAudioSource((source) async {
+      await source.go();
+    });
   }
 }

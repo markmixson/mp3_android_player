@@ -12,24 +12,26 @@ class HapticStreamAudioSource extends StreamAudioSource {
   late String _contentType;
   late ReceivePort _receivePort;
   late SendPort _sendPort;
+  late Future<SendPort> Function(ReceivePort) _processorFunction;
+  late RootIsolateToken? _rootToken;
+  late HapticMode _hapticMode;
 
   HapticStreamAudioSource._();
 
   static Future<HapticStreamAudioSource> create(
     final File file,
     final String contentType,
-    final Future<SendPort> Function(ReceivePort)
-    processorFunction,
+    final Future<SendPort> Function(ReceivePort) processorFunction,
     final HapticMode initialHapticMode,
     final RootIsolateToken? rootToken,
   ) async {
     final source = HapticStreamAudioSource._();
     source._file = file;
     source._contentType = contentType;
-    source._receivePort = ReceivePort();
-    source._sendPort = await processorFunction(source._receivePort);
-    source.setHapticMode(initialHapticMode);
-    source._sendPort.send(rootToken);
+    source._processorFunction = processorFunction;
+    source._rootToken = rootToken;
+    source._hapticMode = initialHapticMode;
+    await source.go();
     return source;
   }
 
@@ -54,7 +56,8 @@ class HapticStreamAudioSource extends StreamAudioSource {
   }
 
   void setHapticMode(final HapticMode hapticMode) {
-    _sendPort.send(hapticMode);
+    _hapticMode = hapticMode;
+    _sendPort.send(_hapticMode);
   }
 
   void _startRead(
@@ -73,8 +76,15 @@ class HapticStreamAudioSource extends StreamAudioSource {
         });
   }
 
-  void dispose() {
+  void stop() {
     _sendPort.send('done');
     _receivePort.close();
+  }
+
+  Future<void> go() async {
+    _receivePort = ReceivePort();
+    _sendPort = await _processorFunction(_receivePort);
+    _sendPort.send(_hapticMode);
+    _sendPort.send(_rootToken);
   }
 }
