@@ -1,16 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mp3_android_player/processors/haptic_pcm_processor.dart';
 import 'package:mp3_android_player/services/default_haptic_service.dart';
 import 'package:mp3_android_player/wrappers/advanced_haptics_wrapper.dart';
 
-class MockAdvancedHapticsWrapper extends Mock implements AdvancedHapticsWrapper {}
-class MockHapticPCMProcessor extends Mock implements HapticPCMProcessor {}
+class MockAdvancedHapticsWrapper extends Mock
+    implements AdvancedHapticsWrapper {}
 
 void main() {
   late DefaultHapticService defaultHapticService;
   late MockAdvancedHapticsWrapper mockHapticsWrapper;
-  late MockHapticPCMProcessor mockProcessor;
 
   setUpAll(() {
     registerFallbackValue(List<int>.from([0]));
@@ -19,10 +17,8 @@ void main() {
 
   setUp(() {
     mockHapticsWrapper = MockAdvancedHapticsWrapper();
-    mockProcessor = MockHapticPCMProcessor();
     defaultHapticService = DefaultHapticService(
       hapticsWrapper: mockHapticsWrapper,
-      processor: mockProcessor,
     );
   });
 
@@ -51,38 +47,52 @@ void main() {
         final shouldCallProcessor = testCase['shouldCallProcessor'] as bool;
 
         if (shouldCallProcessor) {
-          final amplitudes = [10, 20];
-          when(() => mockProcessor.processPcmData(pattern)).thenReturn(amplitudes);
-          when(() => mockHapticsWrapper.playWaveform(any(), any())).thenAnswer((_) async => {});
+          when(
+            () => mockHapticsWrapper.playWaveform(any(), any()),
+          ).thenAnswer((_) async => {});
 
-          await defaultHapticService.playHapticPattern(pattern, duration.inMilliseconds);
+          await defaultHapticService.playHapticPattern(
+            pattern,
+            duration.inMilliseconds,
+          );
 
-          final expectedTimings = List<int>.filled(amplitudes.length, duration.inMilliseconds);
-          verify(() => mockProcessor.processPcmData(pattern)).called(1);
-          verify(() => mockHapticsWrapper.playWaveform(expectedTimings, amplitudes)).called(1);
+          final expectedTimings = List<int>.filled(
+            pattern.length,
+            duration.inMilliseconds,
+          );
+          verify(
+            () => mockHapticsWrapper.playWaveform(expectedTimings, pattern),
+          ).called(1);
         } else {
-          await defaultHapticService.playHapticPattern(pattern, duration.inMilliseconds);
+          await defaultHapticService.playHapticPattern(
+            pattern,
+            duration.inMilliseconds,
+          );
 
-          verifyNever(() => mockProcessor.processPcmData(any()));
           verifyNever(() => mockHapticsWrapper.playWaveform(any(), any()));
         }
       });
     }
 
-    test('playHapticPattern handles exceptions from playWaveform gracefully', () async {
-      final pattern = <int>[1, 2];
-      final duration = const Duration(milliseconds: 50);
-      final amplitudes = [10, 20];
+    test(
+      'playHapticPattern handles exceptions from playWaveform gracefully',
+      () async {
+        final pattern = <int>[1, 2];
+        final duration = const Duration(milliseconds: 50);
 
-      when(() => mockProcessor.processPcmData(pattern)).thenReturn(amplitudes);
-      when(() => mockHapticsWrapper.playWaveform(any(), any())).thenThrow(Exception('Test error'));
+        when(
+          () => mockHapticsWrapper.playWaveform(any(), any()),
+        ).thenThrow(Exception('Test error'));
 
-      // Should not throw exception
-      await defaultHapticService.playHapticPattern(pattern, duration.inMilliseconds);
+        // Should not throw exception
+        await defaultHapticService.playHapticPattern(
+          pattern,
+          duration.inMilliseconds,
+        );
 
-      verify(() => mockProcessor.processPcmData(pattern)).called(1);
-      verify(() => mockHapticsWrapper.playWaveform(any(), any())).called(1);
-    });
+        verify(() => mockHapticsWrapper.playWaveform(any(), any())).called(1);
+      },
+    );
   });
 
   group('stopHaptics', () {

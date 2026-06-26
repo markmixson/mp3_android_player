@@ -2,7 +2,7 @@ import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/sources/haptic_stream_audio_source.dart';
-import 'package:mp3_android_player/sources/haptic_stream_audio_source_background.dart';
+import 'package:mp3_android_player/backgrounds/haptic_background.dart';
 import 'package:mp3_android_player/helpers/ffmpeg_helper.dart';
 import 'package:mp3_android_player/wrappers/ffmpeg_wrapper.dart';
 import 'package:mp3_android_player/wrappers/file_wrapper.dart';
@@ -58,7 +58,7 @@ final defaultAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
 
 /// Default Provider for the [HapticService].
 final hapticServiceProvider = Provider<HapticService>((ref) {
-  final hapticService = HapticStreamAudioSourceBackground.hapticService;
+  final hapticService = HapticBackground.hapticService;
   ref.onDispose(() {
     hapticService.stopHaptics();
   });
@@ -82,7 +82,7 @@ final hapticAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
     lowPassFilterService: lowPassFilterService,
     fileWrapper: FileWrapper(),
     hapticService: hapticService,
-    processorFunction: HapticStreamAudioSourceBackground.runInBackground
+    processorFunction: HapticBackground.runInBackground
   );
 });
 
