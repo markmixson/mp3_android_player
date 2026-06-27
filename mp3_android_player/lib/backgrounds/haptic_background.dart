@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:mp3_android_player/models/haptic_mode.dart';
-import 'package:mp3_android_player/processors/haptic_pcm_processor.dart';
 import 'package:mp3_android_player/services/default_haptic_service.dart';
 import 'package:mp3_android_player/services/haptic_service_interface.dart';
 import 'package:mp3_android_player/backgrounds/haptic_background_context.dart';
@@ -13,12 +11,6 @@ import 'package:mp3_android_player/wrappers/advanced_haptics_wrapper.dart';
 import 'package:mp3_android_player/wrappers/ensure_initialized_wrapper.dart';
 
 class HapticBackground {
-  static const Duration sampleWindowSize = Duration(milliseconds: 20);
-  static final processor = HapticPCMProcessor(
-    sampleRate: 44100,
-    windowDuration: sampleWindowSize,
-  );
-
   static final AdvancedHapticsWrapper wrapper = AdvancedHapticsWrapper();
 
   static final HapticService hapticService = DefaultHapticService(
@@ -34,36 +26,18 @@ class HapticBackground {
   static void consumerIsolate(final SendPort mainSendPort) async {
     final context = HapticBackgroundContext();
     _doSetup(context, mainSendPort);
-    await for (final pcmData in context.controller.stream) {
-      context.pcmProcessing = CancelableOperation.fromFuture(
-        processor.processPcmData(pcmData),
-      );
-      final List<int>? amplitudes = await context.pcmProcessing?.value;
-      if (context.pcmProcessing!.isCanceled) {
+    while (await context.isNext) {
+      final pcmData = context.streamIterator!.current;
+      final amplitudes = await context.getAmplitudes(pcmData);
+      if (context.isPcmProcessingCanceled) {
         break;
       }
-      debugPrint(
-        "processed ${pcmData.length / 2} pcm 16-bit samples and generated ${amplitudes!.length} amplitudes",
-      );
-      context.hapticPlaying = CancelableOperation.fromFuture(
-        hapticService.playHapticPattern(
-          amplitudes,
-          sampleWindowSize.inMilliseconds,
-          context.hapticMode == HapticMode.disabled,
-        ),
-      );
-      final int? count = await context.hapticPlaying?.value;
-      if (context.hapticPlaying!.isCanceled) {
+      await context.getHapticResult(hapticService, amplitudes);
+      if (context.isHapticPlayingCanceled) {
         break;
       }
-      final millis = sampleWindowSize.inMilliseconds * amplitudes.length;
-      debugPrint("haptics running $count! amplitudes over $millis ms");
-
-      context.delay = CancelableOperation.fromFuture(
-        Future.delayed(Duration(milliseconds: millis)),
-      );
-      await context.delay?.value;
-      if (context.delay!.isCanceled) {
+      await context.doDelay(amplitudes.length);
+      if (context.isDelayCanceled) {
         break;
       }
     }
@@ -88,6 +62,7 @@ class HapticBackground {
           debugPrint("got unknown message: $message");
       }
     });
+    context.streamIterator = StreamIterator(context.controller.stream);
     sendPort.send(context.receivePort.sendPort);
   }
 }
