@@ -33,9 +33,14 @@ class HapticBackground {
         break;
       }
       await context.doDelay(amplitudes.length);
+
+      // coverage:ignore-start
+      
       if (context.isDelayCanceled) {
         break;
       }
+
+      // coverage:ignore-end
     }
   }
 

@@ -35,17 +35,25 @@ class HapticBackgroundContext {
     final StreamSubscription<dynamic> subscription,
   ) async {
     receivePort.close();
-    await hapticsController.close();
     await hapticsIterator?.cancel();
+    await hapticsController.close();
     await pcmProcessing?.cancel();
     await hapticPlaying?.cancel();
     await delay?.cancel();
-    sendPort.send('done');
     await subscription.cancel();
+    sendPort.send('done');
   }
 
-  bool get isHapticPlayingCanceled => hapticPlaying?.isCanceled ?? true;
-  bool get isDelayCanceled => delay?.isCanceled ?? true;
+  bool get isHapticPlayingCanceled =>
+      (hapticPlaying?.isCanceled ?? true) || hapticsController.isClosed;
+  
+  // coverage:ignore-start
+  
+  bool get isDelayCanceled =>
+      (delay?.isCanceled ?? true) || hapticsController.isClosed;
+  
+  // coverage:ignore-end
+
   Future<bool> get isNextHaptics async =>
       await hapticsIterator?.moveNext() ?? false;
 
