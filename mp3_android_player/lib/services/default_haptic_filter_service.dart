@@ -33,7 +33,7 @@ class DefaultHapticFilterService implements HapticFilterService {
     final ext = p.extension(path);
     final outputPath = p.join(tempDir.path, 'haptic_$time$ext');
     _tempFiles.add(outputPath);
-    final options = "-i $path -y -ac 1 -af lowpass=f=250 $outputPath";
+    final options = "-i $path -y -ar 44100 -ac 2 -af lowpass=f=250 $outputPath";
     // Apply a low-pass filter at 250Hz and downmix stereo to mono
     return _ffmpegHelper
         .executeAsync(_tempFiles, outputPath, options)
