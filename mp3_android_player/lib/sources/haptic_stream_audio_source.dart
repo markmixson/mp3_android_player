@@ -96,6 +96,5 @@ class HapticStreamAudioSource extends StreamAudioSource {
     _sendPort = await _processorFunction(_receivePort);
     _sendPort.send(_hapticMode);
     _sendPort.send(_rootToken);
-    go();
   }
 }
