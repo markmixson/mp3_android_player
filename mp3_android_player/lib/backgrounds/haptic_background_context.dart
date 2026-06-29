@@ -71,7 +71,7 @@ class HapticBackgroundContext {
     if (paused) {
       return false;
     }
-    return hapticsIterator?.moveNext() ?? false;
+    return await hapticsIterator?.moveNext() ?? false;
   }
       
 
