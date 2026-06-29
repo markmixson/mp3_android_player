@@ -45,7 +45,7 @@ void main() {
           HapticMode.enabled,
           mockRootIsolateToken,
         );
-        source.stop();
+        source.done();
         verify(() => sendPort.send("done")).called(1);
       });
     });

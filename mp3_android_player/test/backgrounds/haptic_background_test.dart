@@ -24,6 +24,8 @@ void main() {
           sendPort.send(HapticMode.disabled);
           sendPort.send([1, 2]);
           sendPort.send(123456);
+          sendPort.send('pause');
+          sendPort.send('go');
           sendPort.send(token);
           sendPort.send('done');
         } else if (data is String) {

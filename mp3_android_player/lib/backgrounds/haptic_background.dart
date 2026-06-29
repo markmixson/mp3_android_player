@@ -26,6 +26,10 @@ class HapticBackground {
   static void consumerIsolate(final SendPort mainSendPort) async {
     final context = HapticBackgroundContext();
     _doSetup(context, mainSendPort);
+    context.receivePort.sendPort.send('go');
+  }
+
+  static void _handleHaptics(final HapticBackgroundContext context) async {
     while (await context.isNextHaptics) {
       final amplitudes = context.hapticsIterator!.current;
       await context.getHapticResult(hapticService, amplitudes);
@@ -35,7 +39,7 @@ class HapticBackground {
       await context.doDelay(amplitudes.length);
 
       // coverage:ignore-start
-      
+
       if (context.isDelayCanceled) {
         break;
       }
@@ -60,6 +64,11 @@ class HapticBackground {
           await EnsureInitializedWrapper.ensureInitialized(token, wrapper);
         case 'done':
           await context.dispose(sendPort, inputSubscription);
+        case 'pause':
+          await context.pause();
+        case 'go':
+          context.setPaused = false;
+          _handleHaptics(context);
         default:
           debugPrint("got unknown message: $message");
       }

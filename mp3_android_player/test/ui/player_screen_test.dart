@@ -102,7 +102,7 @@ void main() {
       () => hapticAudioService.audioSource,
     ).thenReturn(hapticStreamAudioSource);
 
-    when(() => hapticStreamAudioSource.go()).thenAnswer((_) async {});
+    when(() => hapticStreamAudioSource.initialize()).thenAnswer((_) async {});
     when(() => hapticStreamAudioSource.setHapticMode(any())).thenAnswer((_) async {});
 
     when(() => audioService.hasAudioSource).thenReturn(true);

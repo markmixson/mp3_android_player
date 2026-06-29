@@ -74,7 +74,7 @@ final hapticAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
     audioPlayer.dispose();
     if (audioPlayer.audioSource is HapticStreamAudioSource) {
       final source = audioPlayer.audioSource! as HapticStreamAudioSource;
-      source.stop();
+      source.done();
     }
   });
   return HapticAudioPlayerService(

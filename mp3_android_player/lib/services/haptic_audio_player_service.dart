@@ -60,7 +60,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
       processedPath,
     ) async {
       final file = _fileWrapper.getFile(processedPath);
-      stopHapticAudioSource();
+      disposeHapticAudioSource();
       debugPrint(
         "creating hapticStreamAudioSource with file ${file.path}, type $defaultType, hapticMode $hapticMode, and token $rootToken",
       );
@@ -87,6 +87,13 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
     }
   }
 
+  void disposeHapticAudioSource() {
+    runIfHapticAudioSource((source) async {
+      source.done();
+      await _hapticService.stopHaptics();
+    });
+  }
+
   void stopHapticAudioSource() {
     runIfHapticAudioSource((source) async {
       source.stop();
@@ -96,7 +103,7 @@ class HapticAudioPlayerService extends DefaultAudioPlayerService {
 
   void startHapticAudioSource() {
     runIfHapticAudioSource((source) async {
-      await source.go();
+      source.go();
     });
   }
 }
