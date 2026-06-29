@@ -32,7 +32,7 @@ class DefaultHapticFilterService implements HapticFilterService {
     final path = audioFile.path;
     final outputPath = p.join(tempDir.path, 'haptic_$time.wav');
     _tempFiles.add(outputPath);
-    final options = "-i $path -y -c:a pcm_s16le -af 'lowpass=f=120,volume=15dB' -f wav -ar 44100 -ac 2 $outputPath";
+    final options = "-i $path -y -f wav -ar 44100 -ac 2 -c:a pcm_s16le -af 'lowpass=f=250' $outputPath";
     // Apply a low-pass filter at 250Hz
     return _ffmpegHelper
         .executeAsync(_tempFiles, outputPath, options)
