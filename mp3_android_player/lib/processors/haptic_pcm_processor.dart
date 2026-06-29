@@ -12,6 +12,7 @@ class HapticPCMProcessor {
   Future<List<int>> processPcmData(final List<int> pcmData) async {
     final samplesPerWindow = (sampleRate * windowDuration.inMilliseconds / 1000)
         .round();
+
     if (samplesPerWindow <= 0) {
       return [];
     } else {
@@ -24,36 +25,47 @@ class HapticPCMProcessor {
     final int samplesPerWindow,
   ) {
     final List<int> pattern = [];
-    for (int i = 0; i < pcmData.length; i += samplesPerWindow) {
-      final end = (i + samplesPerWindow < pcmData.length)
-          ? i + samplesPerWindow
+
+    // Fix: 1 sample = 2 bytes, so our window chunk size must be doubled
+    final int bytesPerWindow = samplesPerWindow * 2;
+
+    for (int i = 0; i < pcmData.length; i += bytesPerWindow) {
+      final end = (i + bytesPerWindow < pcmData.length)
+          ? i + bytesPerWindow
           : pcmData.length;
       final chunk = pcmData.sublist(i, end);
 
-      // Calculate RMS amplitude for the chunk
       final sumSquares = _getSumOfSquares(chunk);
-      final rms = sqrt(sumSquares / (chunk.length / 2));
-      final amplitude = rms.round().clamp(0, 255);
+
+      // Calculate RMS amplitude for the chunk
+      final int numberOfSamples = chunk.length ~/ 2;
+      if (numberOfSamples == 0) continue;
+
+      final double rms = sqrt(sumSquares / numberOfSamples);
+
+      // Fix: Normalize the 16-bit RMS (0 - 32768) to an 8-bit scale (0 - 255)
+      final int amplitude = ((rms / 32768.0) * 255).round().clamp(0, 255);
       pattern.add(amplitude);
     }
     return pattern;
   }
 
   double _getSumOfSquares(final List<int> chunk) {
-    // Calculate RMS amplitude for the chunk
     double sumSquares = 0;
     for (int j = 0; j < chunk.length; j += 2) {
       if (j + 1 >= chunk.length) break;
 
       // Convert two bytes to a signed 16-bit integer (little-endian)
-      final byte1 = chunk[j];
-      final byte2 = chunk[j + 1];
-      int sample = (byte2 << 8) | (byte1 & 0xFF);
+      // Added defensive bitwise ANDs on both bytes to guarantee no sign-extension issues
+      final int byte1 = chunk[j] & 0xFF;
+      final int byte2 = chunk[j + 1] & 0xFF;
+      int sample = (byte2 << 8) | byte1;
+
       if (sample > 32767) {
         sample -= 65536;
       }
 
-      sumSquares += sample * sample;
+      sumSquares += (sample * sample);
     }
     return sumSquares;
   }
