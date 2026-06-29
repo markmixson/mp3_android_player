@@ -30,11 +30,10 @@ class DefaultHapticFilterService implements HapticFilterService {
     final tempDir = await _temporaryDirectoryHelper.getTemporaryDirectory();
     final time = _clock.now().millisecondsSinceEpoch;
     final path = audioFile.path;
-    final ext = p.extension(path);
-    final outputPath = p.join(tempDir.path, 'haptic_$time$ext');
+    final outputPath = p.join(tempDir.path, 'haptic_$time.wav');
     _tempFiles.add(outputPath);
-    final options = "-i $path -y -ar 44100 -ac 2 -af lowpass=f=250 $outputPath";
-    // Apply a low-pass filter at 250Hz and downmix stereo to mono
+    final options = "-i $path -y -f wav -ar 44100 -ac 2 -af lowpass=f=250 $outputPath";
+    // Apply a low-pass filter at 250Hz
     return _ffmpegHelper
         .executeAsync(_tempFiles, outputPath, options)
         .then((output) async => sourceSetter.call(output));
