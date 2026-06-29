@@ -6,6 +6,7 @@ import 'package:mp3_android_player/helpers/ffmpeg_wrapper.dart';
 import 'package:mp3_android_player/helpers/file_helper.dart';
 import 'package:mp3_android_player/helpers/mime_helper.dart';
 import 'package:mp3_android_player/helpers/temporary_directory_helper.dart';
+import 'package:mp3_android_player/pipes/haptic_audio_pipe.dart';
 import 'package:mp3_android_player/services/audio_file_picker_service_interface.dart';
 import 'package:mp3_android_player/services/audio_player_service_interface.dart';
 // ignore: implementation_imports
@@ -52,19 +53,25 @@ final defaultAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
 /// Haptic Audio Provider for the [AudioPlayerService].
 final hapticAudioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
   final hapticFilterService = ref.read(hapticFilterServiceProvider);
+  final audioPlayer = AudioPlayer();
+  final hapticPipe = HapticAudioPipe(audioPlayer);
+
   final player = HapticAudioPlayerService(
-    player: AudioPlayer(),
+    player: audioPlayer,
     hapticFilterService: hapticFilterService,
     mimeHelper: MimeHelper(),
     fileHelper: FileHelper(),
   );
   ref.onDispose(() {
+    hapticPipe.dispose();
     player.dispose();
   });
   return player;
 });
 
-final preferenceServiceProvider = FutureProvider<PreferenceService?>((ref) async {
+final preferenceServiceProvider = FutureProvider<PreferenceService?>((
+  ref,
+) async {
   final sharedPreferences = await SharedPreferences.getInstance();
   return DefaultPreferenceService(sharedPreferences);
 });
