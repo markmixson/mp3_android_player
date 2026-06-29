@@ -99,7 +99,7 @@ class HapticBackgroundContext {
     );
     final count = await hapticPlaying?.value ?? 0;
     debugPrint(
-      "haptics running $count amplitudes over ${sampleWindowSize.inMilliseconds * amplitudes.length} ms (haptic mode skip: ${hapticMode == HapticMode.disabled})",
+      "haptics running $count amplitudes over ${sampleWindowSize.inMilliseconds * amplitudes.length} ms (haptic mode skip: ${hapticMode == HapticMode.disabled}) - $amplitudes",
     );
   }
 
