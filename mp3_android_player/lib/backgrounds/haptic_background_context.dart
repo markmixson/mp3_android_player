@@ -21,20 +21,22 @@ class HapticBackgroundContext {
   });
 
   final ReceivePort receivePort = ReceivePort();
-  final StreamController<List<int>> controller = StreamController<List<int>>();
+  final StreamController<List<int>> hapticsController =
+      StreamController<List<int>>();
+
   HapticMode hapticMode = HapticMode.disabled;
   CancelableOperation? pcmProcessing;
   CancelableOperation? hapticPlaying;
   CancelableOperation? delay;
-  StreamIterator<List<int>>? streamIterator;
+  StreamIterator<List<int>>? hapticsIterator;
 
   Future<void> dispose(
     final SendPort sendPort,
     final StreamSubscription<dynamic> subscription,
   ) async {
     receivePort.close();
-    await controller.close();
-    await streamIterator?.cancel();
+    await hapticsController.close();
+    await hapticsIterator?.cancel();
     await pcmProcessing?.cancel();
     await hapticPlaying?.cancel();
     await delay?.cancel();
@@ -42,10 +44,10 @@ class HapticBackgroundContext {
     await subscription.cancel();
   }
 
-  bool get isPcmProcessingCanceled => pcmProcessing?.isCanceled ?? true;
   bool get isHapticPlayingCanceled => hapticPlaying?.isCanceled ?? true;
   bool get isDelayCanceled => delay?.isCanceled ?? true;
-  Future<bool> get isNext async => await streamIterator?.moveNext() ?? false;
+  Future<bool> get isNextHaptics async =>
+      await hapticsIterator?.moveNext() ?? false;
 
   Future<List<int>> getAmplitudes(final List<int> pcmData) async {
     pcmProcessing = CancelableOperation.fromFuture(

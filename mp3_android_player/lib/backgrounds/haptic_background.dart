@@ -26,12 +26,8 @@ class HapticBackground {
   static void consumerIsolate(final SendPort mainSendPort) async {
     final context = HapticBackgroundContext();
     _doSetup(context, mainSendPort);
-    while (await context.isNext) {
-      final pcmData = context.streamIterator!.current;
-      final amplitudes = await context.getAmplitudes(pcmData);
-      if (context.isPcmProcessingCanceled) {
-        break;
-      }
+    while (await context.isNextHaptics) {
+      final amplitudes = context.hapticsIterator!.current;
       await context.getHapticResult(hapticService, amplitudes);
       if (context.isHapticPlayingCanceled) {
         break;
@@ -47,22 +43,23 @@ class HapticBackground {
     final HapticBackgroundContext context,
     final SendPort sendPort,
   ) {
-    late StreamSubscription<dynamic> subscription;
-    subscription = context.receivePort.listen((message) async {
+    late StreamSubscription<dynamic> inputSubscription;
+    inputSubscription = context.receivePort.listen((message) async {
       switch (message) {
         case List<int> pcmData:
-          context.controller.sink.add(pcmData);
+          final amplitudes = await context.getAmplitudes(pcmData);
+          context.hapticsController.sink.add(amplitudes);
         case HapticMode hapticMode:
           context.hapticMode = hapticMode;
         case RootIsolateToken? token:
           await EnsureInitializedWrapper.ensureInitialized(token, wrapper);
         case 'done':
-          await context.dispose(sendPort, subscription);
+          await context.dispose(sendPort, inputSubscription);
         default:
           debugPrint("got unknown message: $message");
       }
     });
-    context.streamIterator = StreamIterator(context.controller.stream);
+    context.hapticsIterator = StreamIterator(context.hapticsController.stream);
     sendPort.send(context.receivePort.sendPort);
   }
 }
