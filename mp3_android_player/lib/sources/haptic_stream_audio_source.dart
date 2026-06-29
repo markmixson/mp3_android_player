@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mp3_android_player/models/haptic_mode.dart';
 import 'package:rxdart/rxdart.dart';
@@ -83,6 +84,7 @@ class HapticStreamAudioSource extends StreamAudioSource {
   }
 
   Future<void> go() async {
+    debugPrint("calling go on haptic stream audio source");
     _receivePort = ReceivePort();
     _sendPort = await _processorFunction(_receivePort);
     _sendPort.send(_hapticMode);
