@@ -56,11 +56,14 @@ void main() {
             duration.inMilliseconds,
           );
 
-          final expectedTimings = List<int>.filled(pattern.length, duration.inMilliseconds);
+          final expectedTimings = List<int>.generate(
+            pattern.length * 2,
+            (index) => index % 2 == 0 ? 0 : duration.inMilliseconds,
+          );
           verify(
             () => mockHapticsWrapper.playWaveform(
               expectedTimings,
-              pattern,
+              pattern.expand((element) => [0, element]).toList(),
             ),
           ).called(1);
         } else {
